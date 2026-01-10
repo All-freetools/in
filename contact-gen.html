@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Page Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.4.2/css/all.css">
+    <style>
+        /* --- FLOATING HOME BUTTON STYLE --- */
+        .floating-home-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+            background: #3b82f6; /* Matching Blue */
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-family: sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); transform: scale(1); }
+        }
+        .floating-home-btn:hover { background: #2563eb; transform: scale(1.1); }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo" style="text-decoration:none">
+            <i class="fa-duotone fa-screwdriver-wrench"></i> Free Tool <span>Site</span>
+        </a>
+    </nav>
+
+    <a href="index.html" class="floating-home-btn">
+        <i class="fa-solid fa-house"></i> HOME
+    </a>
+
+    <div class="container" style="max-width: 700px;">
+        <div class="card" style="text-align: left;">
+            <h1 style="color:white; text-align:center;">Contact Us HTML Gen</h1>
+            
+            <label style="color:#94a3b8;">Your Email</label>
+            <input type="text" id="email" placeholder="support@example.com" style="width:100%; padding:12px; margin-bottom:10px; background:#0f172a; border:1px solid #334155; color:white; border-radius:8px;">
+
+            <label style="color:#94a3b8;">WhatsApp / Phone</label>
+            <input type="text" id="phone" placeholder="+123456789" style="width:100%; padding:12px; margin-bottom:10px; background:#0f172a; border:1px solid #334155; color:white; border-radius:8px;">
+
+            <button onclick="generateContact()" style="width:100%; margin-top:20px; padding:15px; background:#3b82f6; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">Generate HTML Code</button>
+
+            <h3 style="color:#10b981; margin-top:30px;">Copy This Code:</h3>
+            <textarea id="result" rows="10" style="width:100%; background:#0f172a; color:white; padding:15px; border:1px solid #334155; border-radius:10px;"></textarea>
+            
+            <button onclick="copyText()" style="margin-top:10px; padding:10px 20px; background:#10b981; color:white; border:none; border-radius:5px; cursor:pointer;">Copy Code</button>
+        </div>
+    </div>
+
+    <script>
+        function generateContact() {
+            let email = document.getElementById('email').value;
+            let phone = document.getElementById('phone').value;
+
+            let html = `<div class="contact-box">
+  <h2>Contact Us</h2>
+  <p>If you have any questions, feel free to reach out:</p>
+  <ul>
+    <li><strong>Email:</strong> <a href="mailto:${email}">${email}</a></li>
+    <li><strong>Phone:</strong> ${phone}</li>
+  </ul>
+</div>`;
+
+            document.getElementById('result').value = html;
+        }
+
+        function copyText() {
+            document.getElementById("result").select();
+            document.execCommand("copy");
+            alert("Code Copied!");
+        }
+    </script>
+</body>
+</html>

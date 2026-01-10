@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultra Compressor</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Reset & Fonts */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    
+    body {
+        background: linear-gradient(135deg, #000428 0%, #004e92 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 15px;
+    }
+
+    .glass-card {
+        background: #fff;
+        width: 100%;
+        max-width: 500px;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    /* Header */
+    .header {
+        background: #004e92;
+        padding: 20px;
+        text-align: center;
+        color: white;
+    }
+    .header h2 { margin: 0; font-size: 22px; }
+    .header p { font-size: 13px; opacity: 0.8; margin-top: 5px; }
+
+    /* Body */
+    .card-body { padding: 20px; }
+
+    /* Upload Area */
+    .upload-box {
+        border: 2px dashed #004e92;
+        background: #f0f8ff;
+        padding: 30px;
+        text-align: center;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .upload-box:active { background: #e6f2ff; transform: scale(0.99); }
+    .upload-box i { font-size: 40px; color: #004e92; margin-bottom: 10px; }
+    #fileInput { display: none; }
+
+    /* Dashboard (Stats) */
+    #dashboard {
+        display: none;
+        background: #f8f9fa;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    .stat-item {
+        background: white;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        text-align: center;
+    }
+    .stat-label { font-size: 11px; color: #777; font-weight: bold; text-transform: uppercase; }
+    .stat-value { font-size: 14px; font-weight: bold; color: #333; margin-top: 3px; }
+
+    .preview-thumb {
+        width: 100%;
+        height: 120px;
+        object-fit: contain;
+        background: #ddd;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    /* Controls */
+    .control-section { display: none; margin-top: 20px; }
+    .section-title { font-size: 14px; font-weight: bold; color: #004e92; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+
+    /* Inputs */
+    .input-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    .input-wrapper { flex: 1; }
+    .input-wrapper label { font-size: 12px; font-weight: bold; color: #555; display: block; margin-bottom: 5px; }
+    .input-wrapper input, .input-wrapper select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        color: #555;
+        margin-bottom: 15px;
+    }
+
+    /* Range Slider */
+    input[type=range] { width: 100%; height: 5px; background: #ddd; }
+
+    /* Action Button */
+    .btn-action {
+        background: #004e92;
+        color: white;
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+        box-shadow: 0 5px 15px rgba(0, 78, 146, 0.3);
+    }
+    .btn-action:active { transform: scale(0.98); }
+
+    /* Result */
+    #result-area {
+        display: none;
+        margin-top: 20px;
+        border-top: 2px dashed #ddd;
+        padding-top: 20px;
+        text-align: center;
+    }
+    #finalImage {
+        width: 100%;
+        border-radius: 8px;
+        border: 4px solid #28a745;
+        margin-top: 10px;
+        pointer-events: auto;
+    }
+    .comparison {
+        display: flex;
+        justify-content: space-between;
+        background: #e8f5e9;
+        padding: 10px;
+        border-radius: 8px;
+        color: #2e7d32;
+        font-weight: bold;
+        font-size: 13px;
+    }
+    .hint { font-size: 12px; color: #856404; background: #fff3cd; padding: 8px; border-radius: 5px; margin-top: 10px; }
+
+    /* --- FLOATING HOME BUTTON STYLE --- */
+    .floating-home-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: #004e92; /* Matching Deep Blue */
+        color: white;
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-family: sans-serif;
+        font-weight: bold;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid rgba(255,255,255,0.2);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        backdrop-filter: blur(5px);
+        animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(0, 78, 146, 0.7); transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 78, 146, 0); transform: scale(1); }
+    }
+    .floating-home-btn:hover { background: #003366; transform: scale(1.1); }
+
+</style>
+</head>
+<body>
+
+<a href="index.html" class="floating-home-btn">
+    <i class="fa-solid fa-house"></i> HOME
+</a>
+
+<div class="glass-card">
+    <div class="header">
+        <h2>Pro Image Tool</h2>
+        <p>Resize • Compress • Convert</p>
+    </div>
+
+    <div class="card-body">
+        
+        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <h3>Tap to Upload Image</h3>
+            <p style="font-size:12px; color:#666;">Supports High Resolution Images</p>
+        </div>
+        <input type="file" id="fileInput" accept="image/*">
+
+        <div id="dashboard">
+            <img id="thumb" class="preview-thumb" src="">
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">File Size</div>
+                    <div class="stat-value" id="dispSize">0 MB</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Format</div>
+                    <div class="stat-value" id="dispType">JPG</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Width</div>
+                    <div class="stat-value" id="dispWidth">0 px</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Height</div>
+                    <div class="stat-value" id="dispHeight">0 px</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-section" id="controls">
+            
+            <div class="section-title"><i class="fa-solid fa-ruler-combined"></i> Resize Dimensions</div>
+            <div class="input-group">
+                <div class="input-wrapper">
+                    <label>Width (px)</label>
+                    <input type="number" id="inpWidth">
+                </div>
+                <div class="input-wrapper">
+                    <label>Height (px)</label>
+                    <input type="number" id="inpHeight">
+                </div>
+            </div>
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="aspectRatio" checked>
+                <label for="aspectRatio">Lock Aspect Ratio (Keep shape)</label>
+            </div>
+
+            <div class="section-title"><i class="fa-solid fa-sliders"></i> Quality & Format</div>
+            
+            <div style="margin-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                    <label style="font-size:12px; font-weight:bold;">Compression Quality</label>
+                    <span id="qValue" style="font-size:12px; font-weight:bold; color:#004e92;">80%</span>
+                </div>
+                <input type="range" id="qRange" min="10" max="100" value="80">
+            </div>
+
+            <div class="input-wrapper">
+                <label>Output Format</label>
+                <select id="outFormat">
+                    <option value="image/jpeg">JPG (Standard)</option>
+                    <option value="image/webp">WEBP (Best Size)</option>
+                    <option value="image/png">PNG (HQ)</option>
+                </select>
+            </div>
+
+            <button class="btn-action" id="processBtn">Process Image</button>
+        </div>
+
+        <div id="result-area">
+            <div class="comparison">
+                <span>Original: <span id="oldSizeComp"></span></span>
+                <span>New: <span id="newSizeComp"></span></span>
+            </div>
+            
+            <img id="finalImage" src="">
+            
+            <div class="hint">
+                <i class="fa-solid fa-hand-pointer"></i> <b>How to Save:</b><br>
+                Long Press the image & select "Download Image".
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<canvas id="canvas" style="display:none;"></canvas>
+
+<script>
+    // Elements
+    const fileInput = document.getElementById('fileInput');
+    const dashboard = document.getElementById('dashboard');
+    const controls = document.getElementById('controls');
+    const thumb = document.getElementById('thumb');
+    
+    // Stats Display
+    const dispSize = document.getElementById('dispSize');
+    const dispType = document.getElementById('dispType');
+    const dispWidth = document.getElementById('dispWidth');
+    const dispHeight = document.getElementById('dispHeight');
+
+    // Inputs
+    const inpWidth = document.getElementById('inpWidth');
+    const inpHeight = document.getElementById('inpHeight');
+    const aspectRatio = document.getElementById('aspectRatio');
+    const qRange = document.getElementById('qRange');
+    const qValue = document.getElementById('qValue');
+    const outFormat = document.getElementById('outFormat');
+    const processBtn = document.getElementById('processBtn');
+
+    // Result
+    const resultArea = document.getElementById('result-area');
+    const finalImage = document.getElementById('finalImage');
+    const oldSizeComp = document.getElementById('oldSizeComp');
+    const newSizeComp = document.getElementById('newSizeComp');
+    
+    // Logic vars
+    let originalImg = new Image();
+    let originalFile = null;
+    let ratio = 0;
+
+    // Helper: Format Bytes
+    function formatSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // 1. File Upload
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+            originalFile = e.target.files[0];
+            
+            // Show Stats
+            dispSize.innerText = formatSize(originalFile.size);
+            dispType.innerText = originalFile.type.split('/')[1].toUpperCase();
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                originalImg.src = event.target.result;
+                originalImg.onload = () => {
+                    // Update Dimensions
+                    dispWidth.innerText = originalImg.width + " px";
+                    dispHeight.innerText = originalImg.height + " px";
+                    thumb.src = originalImg.src;
+
+                    // Set Inputs
+                    inpWidth.value = originalImg.width;
+                    inpHeight.value = originalImg.height;
+                    ratio = originalImg.width / originalImg.height;
+
+                    // Show Sections
+                    dashboard.style.display = 'block';
+                    controls.style.display = 'block';
+                    resultArea.style.display = 'none';
+                    processBtn.innerText = "Process Image";
+                    processBtn.style.display = 'block';
+                }
+            }
+            reader.readAsDataURL(originalFile);
+        }
+    });
+
+    // 2. Aspect Ratio Logic
+    inpWidth.addEventListener('input', () => {
+        if (aspectRatio.checked) {
+            inpHeight.value = Math.round(inpWidth.value / ratio);
+        }
+    });
+
+    inpHeight.addEventListener('input', () => {
+        if (aspectRatio.checked) {
+            inpWidth.value = Math.round(inpHeight.value * ratio);
+        }
+    });
+
+    // 3. Slider Update
+    qRange.addEventListener('input', function() {
+        qValue.innerText = this.value + "%";
+    });
+
+    // 4. Process Logic
+    processBtn.addEventListener('click', () => {
+        processBtn.innerText = "Working...";
+        
+        setTimeout(() => {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            const newW = parseInt(inpWidth.value);
+            const newH = parseInt(inpHeight.value);
+
+            canvas.width = newW;
+            canvas.height = newH;
+
+            // Fill White Background (for PNGs)
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillRect(0, 0, newW, newH);
+            
+            // Draw Resized Image
+            ctx.drawImage(originalImg, 0, 0, newW, newH);
+
+            const qual = qRange.value / 100;
+            const fmt = outFormat.value;
+
+            const finalUrl = canvas.toDataURL(fmt, qual);
+            
+            // Calculate New Size
+            const head = `data:${fmt};base64,`;
+            const sizeBytes = Math.round((finalUrl.length - head.length) * 3 / 4);
+
+            finalImage.src = finalUrl;
+            oldSizeComp.innerText = formatSize(originalFile.size);
+            newSizeComp.innerText = formatSize(sizeBytes);
+
+            resultArea.style.display = 'block';
+            processBtn.style.display = 'none';
+
+        }, 300);
+    });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loan Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    /* --- Styles --- */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+    
+    body {
+        background-color: #f3f4f6;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        color: #1f2937;
+    }
+
+    .calc-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 900px; /* Wide card for Desktop */
+        border-radius: 25px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+        overflow: hidden;
+        display: flex;
+        flex-direction: row; /* Side by side layout */
+        border: 1px solid #e5e7eb;
+    }
+
+    /* Left Side: Inputs */
+    .input-section {
+        flex: 1.2;
+        padding: 40px;
+    }
+
+    /* Right Side: Results */
+    .result-section {
+        flex: 0.8;
+        background: #111827; /* Dark Blue/Black */
+        color: white;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+
+    h2 { font-weight: 800; font-size: 28px; margin-bottom: 5px; color: #111827; }
+    p.sub { color: #6b7280; font-size: 14px; margin-bottom: 30px; font-weight: 600; }
+
+    /* Input Controls */
+    .control-group { margin-bottom: 30px; }
+    
+    .label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .label-row label { font-weight: 700; font-size: 16px; color: #374151; }
+    
+    .input-wrapper {
+        display: flex;
+        align-items: center;
+        background: #f9fafb;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 10px 15px;
+        transition: 0.3s;
+    }
+    .input-wrapper:focus-within { border-color: #4f46e5; background: #fff; }
+    .input-wrapper input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        outline: none;
+    }
+    .unit { font-weight: 700; color: #9ca3af; margin-left: 10px; }
+
+    /* Range Slider */
+    input[type=range] {
+        width: 100%;
+        margin-top: 15px;
+        height: 6px;
+        background: #e5e7eb;
+        border-radius: 5px;
+        outline: none;
+        -webkit-appearance: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 24px; height: 24px;
+        background: #4f46e5;
+        border: 4px solid #c7d2fe;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+
+    /* Result Styling */
+    .emi-box {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .emi-label { font-size: 14px; opacity: 0.7; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
+    .emi-value { font-size: 42px; font-weight: 800; color: #4ade80; margin-top: 5px; }
+
+    .chart-container {
+        width: 220px;
+        height: 220px;
+        margin-bottom: 30px;
+    }
+
+    .breakdown { width: 100%; }
+    .breakdown-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        font-size: 15px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 10px;
+    }
+    .b-label { display: flex; align-items: center; gap: 8px; font-weight: 600; opacity: 0.9; }
+    .b-val { font-weight: 700; }
+    
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .dot-P { background: #4f46e5; } /* Purple for Principal */
+    .dot-I { background: #4ade80; } /* Green for Interest */
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .calc-card { flex-direction: column; }
+        .input-section { padding: 30px 20px; }
+        .result-section { padding: 40px 20px; border-radius: 0 0 25px 25px; }
+        .emi-value { font-size: 36px; }
+    }
+
+    /* --- FLOATING HOME BUTTON STYLE --- */
+    .floating-home-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: #4f46e5; /* Matching Theme Purple */
+        color: white;
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid rgba(255,255,255,0.2);
+        box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+        backdrop-filter: blur(5px);
+        animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); transform: scale(1); }
+    }
+    .floating-home-btn:hover { background: #4338ca; transform: scale(1.1); }
+
+</style>
+</head>
+<body>
+
+<a href="index.html" class="floating-home-btn">
+    <i class="fa-solid fa-house"></i> HOME
+</a>
+
+<div class="calc-card">
+    
+    <div class="input-section">
+        <h2>Loan Calculator</h2>
+        <p class="sub">Calculate your EMI & Interest instantly</p>
+
+        <div class="control-group">
+            <div class="label-row">
+                <label>Loan Amount</label>
+            </div>
+            <div class="input-wrapper">
+                <input type="number" id="amount" value="500000">
+                <span class="unit">₹</span>
+            </div>
+            <input type="range" id="amountRange" min="10000" max="10000000" step="10000" value="500000">
+        </div>
+
+        <div class="control-group">
+            <div class="label-row">
+                <label>Interest Rate (p.a)</label>
+            </div>
+            <div class="input-wrapper">
+                <input type="number" id="rate" value="10.5" step="0.1">
+                <span class="unit">%</span>
+            </div>
+            <input type="range" id="rateRange" min="1" max="30" step="0.1" value="10.5">
+        </div>
+
+        <div class="control-group">
+            <div class="label-row">
+                <label>Loan Tenure</label>
+            </div>
+            <div class="input-wrapper">
+                <input type="number" id="years" value="5">
+                <span class="unit">Years</span>
+            </div>
+            <input type="range" id="yearsRange" min="1" max="30" step="1" value="5">
+        </div>
+    </div>
+
+    <div class="result-section">
+        
+        <div class="emi-box">
+            <div class="emi-label">Monthly EMI</div>
+            <div class="emi-value" id="emiDisplay">₹0</div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="loanChart"></canvas>
+        </div>
+
+        <div class="breakdown">
+            <div class="breakdown-row">
+                <span class="b-label"><span class="dot dot-P"></span> Principal Amount</span>
+                <span class="b-val" id="principalDisplay">₹0</span>
+            </div>
+            <div class="breakdown-row">
+                <span class="b-label"><span class="dot dot-I"></span> Total Interest</span>
+                <span class="b-val" id="interestDisplay">₹0</span>
+            </div>
+            <div class="breakdown-row" style="border:none; margin-top:10px;">
+                <span class="b-label">Total Payable</span>
+                <span class="b-val" id="totalDisplay" style="font-size:18px; color:#fff;">₹0</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Elements
+    const amountInput = document.getElementById('amount');
+    const amountRange = document.getElementById('amountRange');
+    
+    const rateInput = document.getElementById('rate');
+    const rateRange = document.getElementById('rateRange');
+    
+    const yearsInput = document.getElementById('years');
+    const yearsRange = document.getElementById('yearsRange');
+
+    const emiDisplay = document.getElementById('emiDisplay');
+    const principalDisplay = document.getElementById('principalDisplay');
+    const interestDisplay = document.getElementById('interestDisplay');
+    const totalDisplay = document.getElementById('totalDisplay');
+
+    const ctx = document.getElementById('loanChart').getContext('2d');
+    let loanChart;
+
+    // Currency Formatter (Indian System)
+    const formatter = new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+    });
+
+    // Initialize Chart
+    function initChart(principal, interest) {
+        if(loanChart) loanChart.destroy();
+
+        loanChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Principal', 'Interest'],
+                datasets: [{
+                    data: [principal, interest],
+                    backgroundColor: ['#4f46e5', '#4ade80'], // Purple & Green
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) { label += ': '; }
+                                label += formatter.format(context.raw);
+                                return label;
+                            }
+                        }
+                    }
+                },
+                cutout: '70%', // Thickness of the donut
+            }
+        });
+    }
+
+    // Calculation Logic
+    function calculateLoan() {
+        let P = parseFloat(amountInput.value);
+        let R = parseFloat(rateInput.value);
+        let N = parseFloat(yearsInput.value);
+
+        if (P <= 0 || R <= 0 || N <= 0) return;
+
+        let r = R / 12 / 100; // Monthly Interest Rate
+        let n = N * 12;       // Months
+
+        // EMI Formula: P x r x (1+r)^n / ((1+r)^n - 1)
+        let emi = P * r * (Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1));
+        
+        let totalPayable = emi * n;
+        let totalInterest = totalPayable - P;
+
+        // Update UI
+        emiDisplay.innerText = formatter.format(emi);
+        principalDisplay.innerText = formatter.format(P);
+        interestDisplay.innerText = formatter.format(totalInterest);
+        totalDisplay.innerText = formatter.format(totalPayable);
+
+        // Update Chart
+        initChart(P, totalInterest);
+    }
+
+    // Event Listeners for Syncing Range & Inputs
+    function syncInputs(numberInput, rangeInput) {
+        numberInput.addEventListener('input', () => {
+            rangeInput.value = numberInput.value;
+            calculateLoan();
+        });
+        rangeInput.addEventListener('input', () => {
+            numberInput.value = rangeInput.value;
+            calculateLoan();
+        });
+    }
+
+    syncInputs(amountInput, amountRange);
+    syncInputs(rateInput, rateRange);
+    syncInputs(yearsInput, yearsRange);
+
+    // Initial Calc
+    calculateLoan();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEO Slug Generator</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Theme: SEO Tech Blue */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    
+    body {
+        background: linear-gradient(135deg, #36D1DC 0%, #5B86E5 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .tool-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 600px;
+        border-radius: 15px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+        background: #f8f9fa;
+        padding: 20px;
+        border-bottom: 1px solid #e9ecef;
+        text-align: center;
+    }
+    .header h2 { margin: 0; color: #333; font-size: 22px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .header i { color: #5B86E5; }
+    .header p { font-size: 13px; color: #666; margin-top: 5px; }
+
+    /* Body */
+    .card-body { padding: 25px; }
+
+    /* Labels */
+    .label-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: bold;
+        color: #555;
+    }
+    .clear-btn { color: #dc3545; cursor: pointer; font-size: 12px; }
+    .clear-btn:hover { text-decoration: underline; }
+
+    /* Inputs */
+    textarea, input[type="text"] {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 15px;
+        outline: none;
+        transition: 0.3s;
+        background: #fdfdfd;
+        color: #333;
+    }
+    textarea:focus, input:focus { border-color: #5B86E5; background: #fff; }
+    
+    textarea { height: 100px; resize: vertical; margin-bottom: 20px; }
+    
+    /* Output Box Styling */
+    .output-wrapper { position: relative; }
+    .output-wrapper input {
+        background-color: #f0f7ff;
+        border-color: #cfe2ff;
+        color: #084298;
+        font-family: monospace;
+        font-weight: bold;
+        padding-right: 50px; /* Space for copy icon */
+    }
+
+    .copy-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #5B86E5;
+        cursor: pointer;
+        font-size: 18px;
+        background: none;
+        border: none;
+    }
+    .copy-icon:active { transform: translateY(-50%) scale(0.9); }
+
+    /* Settings Bar */
+    .settings {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        align-items: center;
+        border: 1px solid #eee;
+    }
+    
+    .setting-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; }
+    select { padding: 5px; border-radius: 4px; border: 1px solid #ccc; }
+    
+    /* Checkbox */
+    input[type="checkbox"] { accent-color: #5B86E5; width: 16px; height: 16px; cursor: pointer; }
+
+    /* Toast */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-size: 14px;
+        display: none;
+        z-index: 100;
+    }
+
+    /* --- FLOATING HOME BUTTON STYLE --- */
+    .floating-home-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: #5B86E5; /* Matching Tech Blue */
+        color: white;
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-family: 'Segoe UI', sans-serif;
+        font-weight: bold;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid rgba(255,255,255,0.2);
+        box-shadow: 0 5px 15px rgba(91, 134, 229, 0.4);
+        backdrop-filter: blur(5px);
+        animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(91, 134, 229, 0.7); transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { box-shadow: 0 0 0 0 rgba(91, 134, 229, 0); transform: scale(1); }
+    }
+    .floating-home-btn:hover { background: #4a75d4; transform: scale(1.1); }
+
+</style>
+</head>
+<body>
+
+<a href="index.html" class="floating-home-btn">
+    <i class="fa-solid fa-house"></i> HOME
+</a>
+
+<div class="tool-card">
+    <div class="header">
+        <h2><i class="fa-solid fa-link"></i> Text to Slug</h2>
+        <p>Convert Title to SEO Friendly URL</p>
+    </div>
+
+    <div class="card-body">
+        
+        <div class="label-row">
+            <span>Enter Text / Title</span>
+            <span class="clear-btn" id="clearBtn">Clear</span>
+        </div>
+        <textarea id="inputText" placeholder="e.g. How to Make Money Online in 2026..."></textarea>
+
+        <div class="settings">
+            <div class="setting-item">
+                <label>Separator:</label>
+                <select id="separator">
+                    <option value="-">Hyphen (-)</option>
+                    <option value="_">Underscore (_)</option>
+                </select>
+            </div>
+            
+            <div class="setting-item">
+                <input type="checkbox" id="removeNumbers">
+                <label for="removeNumbers">Remove Numbers</label>
+            </div>
+
+            <div class="setting-item">
+                <input type="checkbox" id="removeStopWords">
+                <label for="removeStopWords">Remove Stop Words (a, the, etc.)</label>
+            </div>
+        </div>
+
+        <div class="label-row">
+            <span>Generated Slug</span>
+        </div>
+        <div class="output-wrapper">
+            <input type="text" id="outputText" readonly placeholder="how-to-make-money-online...">
+            <button class="copy-icon" id="copyBtn" title="Copy Slug">
+                <i class="fa-regular fa-copy"></i>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<div class="toast" id="toast">Copied to Clipboard!</div>
+
+<script>
+    const inputText = document.getElementById('inputText');
+    const outputText = document.getElementById('outputText');
+    const separatorSelect = document.getElementById('separator');
+    const removeNumbers = document.getElementById('removeNumbers');
+    const removeStopWords = document.getElementById('removeStopWords');
+    const clearBtn = document.getElementById('clearBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const toast = document.getElementById('toast');
+
+    // Basic Stop Words List
+    const stopWords = ["a", "an", "the", "and", "or", "but", "is", "are", "was", "were", "in", "on", "at", "to", "for", "of", "with"];
+
+    function generateSlug() {
+        let text = inputText.value.toLowerCase();
+        let separator = separatorSelect.value;
+
+        // 1. Remove Accents (e.g., é -> e)
+        text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+        // 2. Remove Stop Words (Optional)
+        if (removeStopWords.checked) {
+            const words = text.split(/\s+/);
+            text = words.filter(w => !stopWords.includes(w)).join(" ");
+        }
+
+        // 3. Remove Numbers (Optional)
+        if (removeNumbers.checked) {
+            text = text.replace(/[0-9]/g, '');
+        }
+
+        text = text
+            .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
+            .trim()                       // Trim whitespace
+            .replace(/\s+/g, separator)   // Replace spaces with separator
+            .replace(/-+/g, separator);   // Remove duplicate separators
+
+        outputText.value = text;
+    }
+
+    // Event Listeners for Live Conversion
+    inputText.addEventListener('input', generateSlug);
+    separatorSelect.addEventListener('change', generateSlug);
+    removeNumbers.addEventListener('change', generateSlug);
+    removeStopWords.addEventListener('change', generateSlug);
+
+    // Clear Button
+    clearBtn.addEventListener('click', () => {
+        inputText.value = '';
+        outputText.value = '';
+        inputText.focus();
+    });
+
+    // Copy Button
+    copyBtn.addEventListener('click', () => {
+        if (!outputText.value) return;
+        
+        outputText.select();
+        outputText.setSelectionRange(0, 99999); // Mobile fix
+        navigator.clipboard.writeText(outputText.value);
+
+        // Show Toast
+        toast.style.display = 'block';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 2000);
+    });
+</script>
+
+</body>
+</html>

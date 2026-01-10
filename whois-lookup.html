@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Whois Lookup</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Theme: Deep Space / Investigation */
+    :root {
+        --bg: #05050a;
+        --card: #0f111a;
+        --accent: #6366f1; /* Indigo */
+        --success: #10b981;
+        --danger: #ef4444;
+        --text: #e2e8f0;
+        --border: #1e293b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    
+    body {
+        background-color: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        background-image: radial-gradient(circle at top, #1e1b4b 0%, transparent 40%);
+    }
+
+    .container {
+        width: 100%;
+        max-width: 800px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* Header */
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .header h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 32px;
+        font-weight: 700;
+        background: linear-gradient(to right, #818cf8, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 5px;
+    }
+    .header p { color: #64748b; font-size: 14px; }
+
+    /* Search Bar */
+    .search-box {
+        background: var(--card);
+        padding: 10px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        display: flex;
+        gap: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
+    input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        padding: 15px;
+        color: white;
+        font-size: 16px;
+        outline: none;
+        font-family: 'Space Grotesk', sans-serif;
+    }
+    
+    .btn-search {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 0 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+        font-size: 15px;
+    }
+    .btn-search:hover { background: #4f46e5; box-shadow: 0 0 15px rgba(99, 102, 241, 0.4); }
+
+    /* Results Area */
+    #resultArea { display: none; animation: slideUp 0.4s ease; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Domain Title Card */
+    .domain-header {
+        background: var(--card);
+        border: 1px solid var(--border);
+        padding: 20px;
+        border-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .domain-name { font-size: 24px; font-weight: 700; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+    .status-badge {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    /* Grid Layout */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .info-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        padding: 20px;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+    }
+    .info-card::before {
+        content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+        background: var(--accent);
+    }
+    
+    .card-label { font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; }
+    .card-value { font-size: 16px; color: #f1f5f9; font-weight: 600; word-break: break-word; }
+
+    /* Name Servers List */
+    .ns-list {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+    }
+    .ns-item {
+        padding: 10px;
+        border-bottom: 1px solid #1e293b;
+        color: #94a3b8;
+        font-family: monospace;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .ns-item:last-child { border-bottom: none; }
+    .ns-item i { color: var(--accent); font-size: 12px; }
+
+    /* Loading */
+    .loader {
+        text-align: center;
+        padding: 40px;
+        display: none;
+        color: var(--accent);
+    }
+    .spinner {
+        width: 30px; height: 30px;
+        border: 3px solid #1e293b;
+        border-top: 3px solid var(--accent);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 10px auto;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* Error Message */
+    .error-msg {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        display: none;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    /* --- FLOATING HOME BUTTON STYLE --- */
+    .floating-home-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: var(--accent); /* Matching Indigo */
+        color: white;
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: bold;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid rgba(255,255,255,0.1);
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        backdrop-filter: blur(5px);
+        animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); transform: scale(1); }
+    }
+    .floating-home-btn:hover { background: #4f46e5; transform: scale(1.1); }
+
+</style>
+</head>
+<body>
+
+<a href="index.html" class="floating-home-btn">
+    <i class="fa-solid fa-house"></i> HOME
+</a>
+
+<div class="container">
+    
+    <div class="header">
+        <h1>Whois Lookup</h1>
+        <p>Check Domain Availability & Ownership Info</p>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="domainInput" placeholder="Enter domain (e.g. google.com)">
+        <button class="btn-search" onclick="fetchWhois()">Search</button>
+    </div>
+
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <p>Scanning Registry Database...</p>
+    </div>
+
+    <div class="error-msg" id="errorMsg">Domain not found or TLD not supported via RDAP.</div>
+
+    <div id="resultArea">
+        
+        <div class="domain-header">
+            <div class="domain-name" id="dName">google.com</div>
+            <div class="status-badge" id="dStatus">Active</div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <div class="card-label">Registrar</div>
+                <div class="card-value" id="dRegistrar">---</div>
+            </div>
+            <div class="info-card">
+                <div class="card-label">Creation Date</div>
+                <div class="card-value" id="dCreated">---</div>
+            </div>
+            <div class="info-card">
+                <div class="card-label">Expiration Date</div>
+                <div class="card-value" id="dExpires">---</div>
+            </div>
+            <div class="info-card">
+                <div class="card-label">IANA ID</div>
+                <div class="card-value" id="dId">---</div>
+            </div>
+        </div>
+
+        <div class="ns-list" id="nsList">
+            <div class="card-label" style="margin-bottom:15px;">Name Servers</div>
+            </div>
+
+    </div>
+
+</div>
+
+<script>
+    const domainInput = document.getElementById('domainInput');
+    const resultArea = document.getElementById('resultArea');
+    const loader = document.getElementById('loader');
+    const errorMsg = document.getElementById('errorMsg');
+
+    // UI Elements
+    const dName = document.getElementById('dName');
+    const dStatus = document.getElementById('dStatus');
+    const dRegistrar = document.getElementById('dRegistrar');
+    const dCreated = document.getElementById('dCreated');
+    const dExpires = document.getElementById('dExpires');
+    const dId = document.getElementById('dId');
+    const nsList = document.getElementById('nsList');
+
+    async function fetchWhois() {
+        let domain = domainInput.value.trim().toLowerCase();
+        
+        // Basic Validation
+        if(!domain.includes('.')) {
+            alert("Please enter a valid domain (e.g. example.com)");
+            return;
+        }
+
+        // Reset UI
+        resultArea.style.display = 'none';
+        errorMsg.style.display = 'none';
+        loader.style.display = 'block';
+
+        try {
+            // Using RDAP (Registration Data Access Protocol) - Modern replacement for WHOIS
+            // It supports CORS and returns JSON!
+            const response = await fetch(`https://rdap.org/domain/${domain}`);
+            
+            if (!response.ok) throw new Error("Domain not found");
+            const data = await response.json();
+
+            // Populate Data
+            renderData(data, domain);
+            
+            loader.style.display = 'none';
+            resultArea.style.display = 'block';
+
+        } catch (error) {
+            console.error(error);
+            loader.style.display = 'none';
+            errorMsg.innerText = "Error: Could not fetch data. The domain might be invalid or the TLD registry doesn't support public RDAP.";
+            errorMsg.style.display = 'block';
+        }
+    }
+
+    function renderData(data, domain) {
+        dName.innerText = data.handle || domain;
+        
+        // 1. Find Registrar
+        let registrarName = "Unknown / Hidden";
+        if (data.entities) {
+            const registrar = data.entities.find(e => e.roles && e.roles.includes('registrar'));
+            if (registrar && registrar.vcardArray) {
+                // vCard parsing is messy in RDAP, usually the name is at index 1 -> 3
+                // Simple attempt to find a string that looks like a name
+                const vcard = registrar.vcardArray[1];
+                const fn = vcard.find(item => item[0] === 'fn');
+                if (fn) registrarName = fn[3];
+            }
+        }
+        dRegistrar.innerText = registrarName;
+
+        // 2. Find Dates
+        let created = "---";
+        let expires = "---";
+        
+        if (data.events) {
+            const regEvent = data.events.find(e => e.eventAction === 'registration');
+            const expEvent = data.events.find(e => e.eventAction === 'expiration');
+            
+            if (regEvent) created = new Date(regEvent.eventDate).toLocaleDateString();
+            if (expEvent) expires = new Date(expEvent.eventDate).toLocaleDateString();
+        }
+        dCreated.innerText = created;
+        dExpires.innerText = expires;
+
+        // 3. Status
+        let status = "Active";
+        if(data.status && data.status.length > 0) {
+            status = data.status[0]; // e.g. "client transfer prohibited"
+        }
+        dStatus.innerText = status;
+
+        // 4. IANA ID (if available)
+        dId.innerText = data.rowNum || "N/A";
+
+        // 5. Name Servers
+        let nsHtml = '<div class="card-label" style="margin-bottom:15px;">Name Servers</div>';
+        if (data.nameservers) {
+            data.nameservers.forEach(ns => {
+                nsHtml += `<div class="ns-item"><i class="fa-solid fa-server"></i> ${ns.ldhName}</div>`;
+            });
+        } else {
+            nsHtml += `<div class="ns-item">No Name Servers found.</div>`;
+        }
+        nsList.innerHTML = nsHtml;
+    }
+
+    // Trigger search on Enter key
+    domainInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            fetchWhois();
+        }
+    });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Counter</title>
+    
+    <link rel="stylesheet" href="style.css"> 
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.4.2/css/all.css">
+    
+    <style>
+        /* --- FLOATING HOME BUTTON STYLE --- */
+        .floating-home-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+            background: #3b82f6; /* Matching Blue */
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-family: sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+            backdrop-filter: blur(5px);
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); transform: scale(1); }
+        }
+        .floating-home-btn:hover { background: #2563eb; transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="logo" style="text-decoration:none">
+            <i class="fa-duotone fa-screwdriver-wrench"></i> Free Tool <span>Site</span>
+        </a>
+    </nav>
+
+    <a href="index.html" class="floating-home-btn">
+        <i class="fa-solid fa-house"></i> HOME
+    </a>
+
+    <div class="container" style="max-width: 800px;">
+        <div class="card" style="text-align: left;">
+            <h1 style="color:white;">Word Counter</h1>
+            <textarea id="textInput" placeholder="Type text here..." style="width:100%; height:200px; background:#0f172a; border:1px solid #334155; color:white; padding:15px; border-radius:10px;"></textarea>
+            
+            <div style="margin-top:20px; color:white;">
+                <span id="wordCount" style="font-size:30px; color:#3b82f6;">0</span> Words | 
+                <span id="charCount" style="font-size:30px; color:#10b981;">0</span> Characters
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const textInput = document.getElementById('textInput');
+        textInput.addEventListener('input', function() {
+            let text = this.value.trim();
+            document.getElementById('charCount').innerText = text.length;
+            // Improved regex to handle multiple spaces/newlines better
+            document.getElementById('wordCount').innerText = text === "" ? 0 : text.split(/\s+/).length;
+        });
+    </script>
+</body>
+</html>

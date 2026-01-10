@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Identity Scanner</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+    /* Theme: Cyberpunk / Matrix Green */
+    :root {
+        --primary: #00ff41; /* Hacker Green */
+        --bg: #0d0d0d;
+        --card-bg: #111;
+        --border: #333;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Space Mono', monospace; }
+    
+    body {
+        background-color: var(--bg);
+        color: #ddd;
+        min-height: 100vh;
+        padding: 10px;
+        background-image: 
+            linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+
+    .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* Header */
+    .header {
+        text-align: center;
+        margin-bottom: 10px;
+        border-bottom: 2px solid var(--primary);
+        padding-bottom: 15px;
+    }
+    .header h1 { 
+        color: var(--primary); 
+        text-transform: uppercase; 
+        font-family: 'Rajdhani', sans-serif; 
+        font-size: 28px;
+        letter-spacing: 2px;
+    }
+    .header span { font-size: 12px; color: #666; }
+    .blink { animation: blinker 1s linear infinite; color: red; }
+    @keyframes blinker { 50% { opacity: 0; } }
+
+    /* Grid Layout */
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    /* Cards */
+    .card {
+        background: rgba(17, 17, 17, 0.9);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--primary);
+        padding: 20px;
+        position: relative;
+    }
+    .card-title {
+        color: var(--primary);
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-transform: uppercase;
+    }
+
+    /* IP Section */
+    .ip-display {
+        text-align: center;
+        padding: 20px 0;
+    }
+    .ip-text {
+        font-size: 32px;
+        color: #fff;
+        font-weight: bold;
+        text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        margin-bottom: 5px;
+    }
+    .ip-label { font-size: 12px; color: #888; }
+
+    /* Map */
+    #map {
+        height: 250px;
+        width: 100%;
+        border: 1px solid #333;
+        filter: grayscale(100%) invert(90%) contrast(120%); /* Matrix Map Style */
+    }
+
+    /* Data Lists */
+    .data-row {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px dashed #333;
+        padding: 8px 0;
+        font-size: 13px;
+    }
+    .data-row:last-child { border-bottom: none; }
+    .d-label { color: #888; }
+    .d-val { color: #fff; text-align: right; }
+    .d-val.highlight { color: var(--primary); }
+
+    /* Battery & System */
+    .battery-level {
+        height: 10px;
+        background: #333;
+        border-radius: 5px;
+        margin-top: 5px;
+        overflow: hidden;
+    }
+    .battery-fill {
+        height: 100%;
+        background: var(--primary);
+        width: 0%;
+        transition: 1s;
+    }
+
+    /* Buttons */
+    .btn {
+        width: 100%;
+        padding: 12px;
+        background: transparent;
+        border: 1px solid var(--primary);
+        color: var(--primary);
+        font-family: 'Space Mono', monospace;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: 0.2s;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+    .btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+        .grid { grid-template-columns: 1fr; }
+        .ip-text { font-size: 26px; }
+    }
+
+    /* Loading Animation */
+    .scanning::after {
+        content: '...';
+        animation: dots 1.5s steps(5, end) infinite;
+    }
+    @keyframes dots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60% { content: '...'; } }
+
+    /* --- FLOATING HOME BUTTON STYLE --- */
+    .floating-home-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: #00ff41; /* Hacker Green */
+        color: #000; /* Black Text */
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-family: 'Space Mono', monospace;
+        font-weight: bold;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid rgba(0, 255, 65, 0.2);
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+        backdrop-filter: blur(5px);
+        animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(0, 255, 65, 0.7); transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 255, 65, 0); transform: scale(1); }
+    }
+    .floating-home-btn:hover { background: #00cc33; transform: scale(1.1); }
+
+</style>
+</head>
+<body>
+
+<a href="index.html" class="floating-home-btn">
+    <i class="fa-solid fa-house"></i> HOME
+</a>
+
+<div class="container">
+    <div class="header">
+        <h1>System_Identity_V2</h1>
+        <span><span class="blink">●</span> LIVE SCANNING IN PROGRESS</span>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <div class="card-title">
+                <i class="fa-solid fa-globe"></i> Network Identity
+            </div>
+            <div class="ip-display">
+                <div class="ip-text" id="ipAddress">Scanning...</div>
+                <div class="ip-label">Public IPv4 Address</div>
+            </div>
+            
+            <div class="data-row">
+                <span class="d-label">ISP / Org:</span>
+                <span class="d-val" id="ispName">---</span>
+            </div>
+            <div class="data-row">
+                <span class="d-label">Connection:</span>
+                <span class="d-val" id="conType">---</span>
+            </div>
+            <button class="btn" onclick="copyData()"><i class="fa-solid fa-copy"></i> Copy Full Report</button>
+        </div>
+
+        <div class="card" style="padding:0; overflow:hidden; border:1px solid #333;">
+            <div id="map"></div>
+            <div style="padding:10px; background:#111; border-top:1px solid #333; display:flex; justify-content:space-between; font-size:12px;">
+                <span style="color:var(--primary)">LAT: <span id="latVal">0.00</span></span>
+                <span style="color:var(--primary)">LON: <span id="lonVal">0.0

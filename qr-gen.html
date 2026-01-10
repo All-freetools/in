@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.4.2/css/all.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        #qr-container { 
+            background: white; padding: 20px; border-radius: 10px; 
+            display: inline-block; margin-top: 20px;
+        }
+
+        /* --- FLOATING HOME BUTTON STYLE --- */
+        .floating-home-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+            background: #8b5cf6; /* Matching Violet Icon */
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-family: sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+            backdrop-filter: blur(5px);
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); transform: scale(1); }
+        }
+        .floating-home-btn:hover { background: #7c3aed; transform: scale(1.1); }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo" style="text-decoration:none">
+            <i class="fa-duotone fa-screwdriver-wrench"></i> Free Tool <span>Site</span>
+        </a>
+    </nav>
+
+    <a href="index.html" class="floating-home-btn">
+        <i class="fa-solid fa-house"></i> HOME
+    </a>
+
+    <div class="container" style="max-width: 500px;">
+        <div class="card">
+            <h1 style="color:white;"><i class="fa-solid fa-qrcode" style="color:#8b5cf6"></i> QR Generator</h1>
+            
+            <input type="text" id="qrText" placeholder="Type link or text here..." 
+            style="width:100%; padding:15px; background:#0f172a; border:1px solid #334155; color:white; border-radius:10px; outline:none; box-sizing:border-box;">
+            
+            <button onclick="generateQR()" style="width:100%; margin-top:15px; padding:15px; background:#3b82f6; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">
+                Generate QR Code
+            </button>
+
+            <div id="resultBox" style="display:none; text-align:center;">
+                
+                <div id="qr-container">
+                    <div id="qrcode"></div>
+                </div>
+
+                <p style="color:#f59e0b; font-size:13px; margin-top:10px;">
+                    <i class="fa-solid fa-info-circle"></i> If button fails, Long Press the QR to save.
+                </p>
+                
+                <button onclick="downloadQR()" style="margin-top:10px; width:100%; padding:15px; background:#10b981; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">
+                    <i class="fa-solid fa-download"></i> Download QR Image
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generateQR() {
+            let text = document.getElementById('qrText').value;
+            let container = document.getElementById('qrcode');
+            let resultBox = document.getElementById('resultBox');
+
+            if(!text) return alert("Please enter text!");
+
+            // 1. Clear previous QR
+            container.innerHTML = "";
+            resultBox.style.display = 'block';
+
+            // 2. Generate QR (Library creates a CANVAS inside 'qrcode' div)
+            new QRCode(container, {
+                text: text,
+                width: 250,
+                height: 250,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+
+        // --- SAME DOWNLOAD METHOD AS IMAGE RESIZER ---
+        function downloadQR() {
+            // Find the canvas created by the library
+            let canvas = document.querySelector("#qrcode canvas");
+            
+            if(!canvas) {
+                // Sometimes library creates IMG instead of CANVAS, handle that
+                let img = document.querySelector("#qrcode img");
+                if(img) {
+                    let link = document.createElement("a");
+                    link.href = img.src;
+                    link.download = "qr-code.png";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    return;
+                }
+                return alert("QR not ready yet!");
+            }
+
+            // Convert Canvas to Blob (The working method)
+            canvas.toBlob(function(blob) {
+                if(!blob) return alert("Error creating file!");
+                
+                let url = URL.createObjectURL(blob);
+                let link = document.createElement('a');
+                link.download = "qr-code.png";
+                link.href = url;
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Cleanup
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+            }, "image/png");
+        }
+    </script>
+</body>
+</html>

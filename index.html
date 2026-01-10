@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Tool Site</title>
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.4.2/css/all.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 1. GLOBAL STYLES --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        body {
+            background-color: #0f172a; /* Dark Navy Background */
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        /* --- 2. NAVBAR --- */
+        .navbar {
+            padding: 20px 5%;
+            display: flex;
+            justify-content: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo { font-size: 24px; font-weight: 700; color: white; display: flex; align-items: center; gap: 10px; }
+        .logo i { color: #3b82f6; animation: spin 5s linear infinite; }
+        .logo span { color: #3b82f6; }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- 3. HERO SECTION (ANIMATED TEXT) --- */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 70%);
+        }
+        .hero h1 { font-size: 42px; font-weight: 800; margin-bottom: 10px; }
+        
+        /* Animated Gradient Text */
+        .gradient-text {
+            background: linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 300%;
+            animation: flowText 5s infinite linear;
+        }
+        @keyframes flowText { 0% { background-position: 0%; } 100% { background-position: 100%; } }
+
+        .hero p { color: #94a3b8; font-size: 16px; margin-bottom: 30px; }
+
+        /* --- 4. SEARCH BAR --- */
+        .search-wrapper {
+            background: #1e293b;
+            padding: 8px 20px;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid #334155;
+            transition: 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .search-wrapper:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            transform: scale(1.02);
+        }
+        .search-wrapper input {
+            background: transparent; border: none; outline: none;
+            color: white; font-size: 16px; width: 100%; margin-left: 10px;
+        }
+        .search-btn {
+            background: #3b82f6; color: white; border: none;
+            padding: 10px 25px; border-radius: 30px; font-weight: 600; cursor: pointer;
+            transition: 0.3s;
+        }
+        .search-btn:hover { background: #2563eb; }
+
+        /* --- 5. CATEGORY BUTTONS (ANIMATED) --- */
+        .category-container {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .cat-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #cbd5e1;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 500;
+        }
+        .cat-btn:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-3px);
+            color: white;
+        }
+        .cat-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        /* --- 6. TOOL GRID (THE MAIN CARDS) --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding-bottom: 50px;
+        }
+
+        /* --- 7. CARD DESIGN (HOVER BORDER ANIMATION) --- */
+        .card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #334155;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Hover Effect: Lift & Glow */
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: transparent;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        /* The Animated Border using ::before */
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 16px;
+            padding: 2px; /* Border Width */
+            background: linear-gradient(45deg, #ff0055, #00ddff);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: 0.4s;
+        }
+        .card:hover::before { opacity: 1; }
+
+        /* Icon Animation */
+        .icon-box {
+            font-size: 32px;
+            margin-bottom: 15px;
+            transition: 0.4s;
+        }
+        /* Icon Colors */
+        .c-blue { color: #60a5fa; text-shadow: 0 0 20px rgba(96, 165, 250, 0.4); }
+        .c-orange { color: #fbbf24; text-shadow: 0 0 20px rgba(251, 191, 36, 0.4); }
+        .c-purple { color: #a78bfa; text-shadow: 0 0 20px rgba(167, 139, 250, 0.4); }
+        .c-green { color: #34d399; text-shadow: 0 0 20px rgba(52, 211, 153, 0.4); }
+
+        .card:hover .icon-box {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 5px; z-index: 2; }
+        .card p { font-size: 12px; color: #94a3b8; z-index: 2; }
+
+        /* Footer */
+        footer { text-align: center; padding: 40px; color: #64748b; font-size: 14px; border-top: 1px solid #334155; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 32px; }
+            .grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .card { padding: 20px 15px; }
+            .icon-box { font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fa-duotone fa-screwdriver-wrench"></i> Free Tool <span>Site</span>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>All Tools in <span class="gradient-text">One Place</span></h1>
+        <p>Search 30+ tools. 100% Free.</p>
+        
+        <div class="search-container">
+            <div class="search-wrapper">
+                <i class="fa-solid fa-magnifying-glass" style="color:#94a3b8"></i>
+                <input type="text" id="searchInput" placeholder="Find a tool..." onkeyup="filterTools()">
+                <button class="search-btn">Search</button>
+            </div>
+        </div>
+
+        <div class="category-container">
+            <button class="cat-btn active" onclick="filterCategory('all', this)">All</button>
+            <button class="cat-btn" onclick="filterCategory('text', this)">Text</button>
+            <button class="cat-btn" onclick="filterCategory('image', this)">Image</button>
+            <button class="cat-btn" onclick="filterCategory('math', this)">Math</button>
+            <button class="cat-btn" onclick="filterCategory('dev', this)">Dev</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="grid" id="toolGrid">
+            
+            <a href="word-counter.html" class="card" data-cat="text">
+                <div class="icon-box c-blue"><i class="fa-solid fa-align-left"></i></div>
+                <h3>Word Counter</h3> <p>Count words.</p>
+            </a>
+            <a href="case-converter.html" class="card" data-cat="text">
+                <div class="icon-box c-blue"><i class="fa-solid fa-text-size"></i></div>
+                <h3>Case Converter</h3> <p>Change case.</p>
+            </a>
+            <a href="lorem-ipsum.html" class="card" data-cat="text">
+                <div class="icon-box c-blue"><i class="fa-solid fa-paragraph"></i></div>
+                <h3>Lorem Ipsum</h3> <p>Dummy text.</p>
+            </a>
+            <a href="text-to-slug.html" class="card" data-cat="text">
+                <div class="icon-box c-blue"><i class="fa-solid fa-link"></i></div>
+                <h3>Text to Slug</h3> <p>SEO URL.</p>
+            </a>
+            <a href="text-repeater.html" class="card" data-cat="text">
+                <div class="icon-box c-blue"><i class="fa-solid fa-repeat"></i></div>
+                <h3>Text Repeater</h3> <p>Loop text.</p>
+            </a>
+            <a href="about-us-gen.html" class="card" data-cat="text">
+                <div class="icon-box c-blue"><i class="fa-solid fa-address-card"></i></div>
+                <h3>About Us Gen</h3> <p>Create About page.</p>
+            </a>
+            <a href="terms-generator.html" class="card" data-cat="text">
+                <div class="icon-box c-blue"><i class="fa-solid fa-file-contract"></i></div>
+                <h3>Terms Generator</h3> <p>Legal page maker.</p>
+            </a>
+
+            <a href="id-card-maker.html" class="card" data-cat="image">
+                <div class="icon-box c-orange"><i class="fa-solid fa-id-card-clip"></i></div>
+                <h3>ID Card Maker</h3> <p>Aadhar/PAN Print.</p>
+            </a>
+            <a href="photo-resizer.html" class="card" data-cat="image">
+                <div class="icon-box c-purple"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
+                <h3>Photo Resizer</h3> <p>Resize w/h.</p>
+            </a>
+            <a href="image-resizer.html" class="card" data-cat="image">
+                <div class="icon-box c-green"><i class="fa-solid fa-expand"></i></div>
+                <h3>Image Resizer</h3> <p>Simple Resize.</p>
+            </a>
+            <a href="image-cropper.html" class="card" data-cat="image">
+                <div class="icon-box c-green"><i class="fa-solid fa-crop-simple"></i></div>
+                <h3>Image Cropper</h3> <p>Crop picture.</p>
+            </a>
+            <a href="compressor.html" class="card" data-cat="image">
+                <div class="icon-box c-green"><i class="fa-solid fa-compress"></i></div>
+                <h3>Compressor</h3> <p>Reduce size.</p>
+            </a>
+            <a href="jpg-to-png.html" class="card" data-cat="image">
+                <div class="icon-box c-green"><i class="fa-solid fa-image"></i></div>
+                <h3>JPG to PNG</h3> <p>Convert file.</p>
+            </a>
+            <a href="png-to-jpg.html" class="card" data-cat="image">
+                <div class="icon-box c-green"><i class="fa-solid fa-file-image"></i></div>
+                <h3>PNG to JPG</h3> <p>Convert file.</p>
+            </a>
+            <a href="thumbnail-downloader.html" class="card" data-cat="image">
+                <div class="icon-box c-green"><i class="fa-brands fa-youtube"></i></div>
+                <h3>Thumbnail DL</h3> <p>Save Thumb.</p>
+            </a>
+            <a href="image-to-text.html" class="card" data-cat="image">
+                <div class="icon-box c-blue"><i class="fa-solid fa-expand"></i></div>
+                <h3>Image to Text</h3> <p>Extract text.</p>
+            </a>
+
+            <a href="age-calculator.html" class="card" data-cat="math">
+                <div class="icon-box c-orange"><i class="fa-solid fa-cake-candles"></i></div>
+                <h3>Age Calculator</h3> <p>Check age.</p>
+            </a>
+            <a href="bmi-calc.html" class="card" data-cat="math">
+                <div class="icon-box c-orange"><i class="fa-solid fa-weight-scale"></i></div>
+                <h3>BMI Calculator</h3> <p>Health Score.</p>
+            </a>
+            <a href="loan-calculator.html" class="card" data-cat="math">
+                <div class="icon-box c-orange"><i class="fa-solid fa-money-bill"></i></div>
+                <h3>Loan Calc</h3> <p>EMI Check.</p>
+            </a>
+            <a href="percentage-calc.html" class="card" data-cat="math">
+                <div class="icon-box c-orange"><i class="fa-solid fa-percent"></i></div>
+                <h3>Percentage</h3> <p>Math help.</p>
+            </a>
+            <a href="discount-calc.html" class="card" data-cat="math">
+                <div class="icon-box c-orange"><i class="fa-solid fa-tags"></i></div>
+                <h3>Discount</h3> <p>Sale price.</p>
+            </a>
+            <a href="crypto-price.html" class="card" data-cat="math">
+                <div class="icon-box c-orange"><i class="fa-brands fa-bitcoin"></i></div>
+                <h3>Crypto Price</h3> <p>Live rates.</p>
+            </a>
+
+            <a href="qr-gen.html" class="card" data-cat="dev">
+                <div class="icon-box c-purple"><i class="fa-solid fa-qrcode"></i></div>
+                <h3>QR Generator</h3> <p>Make QR code.</p>
+            </a>
+            <a href="password-gen.html" class="card" data-cat="dev">
+                <div class="icon-box c-purple"><i class="fa-solid fa-key"></i></div>
+                <h3>Password Gen</h3> <p>Strong pass.</p>
+            </a>
+            <a href="contact-gen.html" class="card" data-cat="dev">
+                <div class="icon-box c-purple"><i class="fa-solid fa-envelope"></i></div>
+                <h3>Contact Gen</h3> <p>HTML Contact.</p>
+            </a>
+            <a href="html-viewer.html" class="card" data-cat="dev">
+                <div class="icon-box c-purple"><i class="fa-brands fa-html5"></i></div>
+                <h3>HTML Viewer</h3> <p>View code.</p>
+            </a>
+            <a href="css-minify.html" class="card" data-cat="dev">
+                <div class="icon-box c-purple"><i class="fa-brands fa-css3"></i></div>
+                <h3>CSS Minify</h3> <p>Compress CSS.</p>
+            </a>
+            <a href="js-minify.html" class="card" data-cat="dev">
+                <div class="icon-box c-purple"><i class="fa-brands fa-js"></i></div>
+                <h3>JS Minify</h3> <p>Compress JS.</p>
+            </a>
+            <a href="my-ip.html" class="card" data-cat="dev">
+                <div class="icon-box c-purple"><i class="fa-solid fa-globe"></i></div>
+                <h3>My IP</h3> <p>Check IP.</p>
+            </a>
+            <a href="whois-lookup.html" class="card" data-cat="dev">
+                <div class="icon-box c-purple"><i class="fa-solid fa-server"></i></div>
+                <h3>Whois</h3> <p>Domain info.</p>
+            </a>
+
+        </div> 
+    </div> 
+
+    <footer>
+        <p class="footer-text">&copy; 2024 Free Tool Site. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function filterCategory(category, btn) {
+            let cards = document.querySelectorAll('.card');
+            let buttons = document.querySelectorAll('.cat-btn');
+
+            buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            cards.forEach(card => {
+                let cat = card.getAttribute('data-cat');
+                if (category === 'all' || cat === category) {
+                    card.style.display = "flex";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        }
+
+        function filterTools() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            let cards = document.querySelectorAll('.card');
+
+            cards.forEach(card => {
+                let title = card.querySelector('h3').innerText.toLowerCase();
+                if (title.includes(input)) {
+                    card.style.display = "flex";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        }
+    </script>
+</body>
+</html>

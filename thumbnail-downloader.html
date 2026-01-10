@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YT Thumbnail Grabber</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Youtube Studio Theme */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    
+    body {
+        background-color: #121212; /* Dark Background */
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .yt-card {
+        background: #212121; /* Lighter dark card */
+        width: 100%;
+        max-width: 500px;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        border: 1px solid #333;
+    }
+
+    /* Header */
+    .header {
+        background: linear-gradient(45deg, #cc0000, #ff0000); /* YouTube Red */
+        padding: 25px;
+        text-align: center;
+        color: white;
+    }
+    .header i { font-size: 40px; margin-bottom: 10px; }
+    .header h2 { margin: 0; font-size: 24px; font-weight: bold; }
+    .header p { font-size: 14px; opacity: 0.9; margin-top: 5px; }
+
+    /* Body */
+    .card-body { padding: 25px; }
+
+    /* Input Area */
+    .input-group {
+        position: relative;
+        margin-bottom: 25px;
+    }
+    .input-group i {
+        position: absolute;
+        top: 50%;
+        left: 15px;
+        transform: translateY(-50%);
+        color: #cc0000;
+    }
+    input[type="text"] {
+        width: 100%;
+        padding: 15px 15px 15px 45px;
+        border: 2px solid #333;
+        background: #181818;
+        border-radius: 10px;
+        font-size: 16px;
+        color: white;
+        outline: none;
+        transition: 0.3s;
+    }
+    input[type="text"]:focus { border-color: #cc0000; }
+
+    /* Search Button */
+    .btn-search {
+        background: #cc0000;
+        color: white;
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 50px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .btn-search:active { transform: scale(0.98); background: #e60000; }
+
+    /* Error Message */
+    #errorMsg {
+        color: #ff4444;
+        text-align: center;
+        margin-bottom: 15px;
+        font-size: 14px;
+        display: none;
+    }
+
+    /* Result Section */
+    #resultArea {
+        display: none; /* Hidden Initially */
+        margin-top: 30px;
+        border-top: 1px solid #333;
+        padding-top: 25px;
+    }
+
+    .preview-container {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+        background: #000;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        border: 2px solid #cc0000;
+    }
+    .preview-container img {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Quality Buttons Grid */
+    .quality-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .btn-quality {
+        background: #333;
+        color: white;
+        text-decoration: none;
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        transition: 0.3s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid transparent;
+    }
+    .btn-quality:hover { background: #444; border-color: #cc0000; }
+    .btn-quality span.res { font-size: 12px; color: #aaa; margin-top: 5px; }
+    .btn-quality i { margin-bottom: 5px; color: #cc0000; }
+
+    .hint {
+        text-align: center;
+        font-size: 13px;
+        color: #aaa;
+        margin-top: 20px;
+        background: #181818;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    /* --- FLOATING HOME BUTTON STYLE --- */
+    .floating-home-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: #cc0000; /* Matching YouTube Red */
+        color: white;
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-family: sans-serif;
+        font-weight: bold;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid rgba(255,255,255,0.2);
+        box-shadow: 0 5px 15px rgba(204, 0, 0, 0.4);
+        backdrop-filter: blur(5px);
+        animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(204, 0, 0, 0.7); transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { box-shadow: 0 0 0 0 rgba(204, 0, 0, 0); transform: scale(1); }
+    }
+    .floating-home-btn:hover { background: #e60000; transform: scale(1.1); }
+
+</style>
+</head>
+<body>
+
+<a href="index.html" class="floating-home-btn">
+    <i class="fa-solid fa-house"></i> HOME
+</a>
+
+<div class="yt-card">
+    <div class="header">
+        <i class="fa-brands fa-youtube"></i>
+        <h2>Thumbnail Downloader</h2>
+        <p>Save High-Quality Video Thumbnails</p>
+    </div>
+
+    <div class="card-body">
+        
+        <div class="input-group">
+            <i class="fa-solid fa-link"></i>
+            <input type="text" id="ytUrl" placeholder="Paste YouTube Video URL here...">
+        </div>
+        <p id="errorMsg"><i class="fa-solid fa-circle-exclamation"></i> Invalid YouTube URL! Please check.</p>
+        <button class="btn-search" id="getBtn">Get Thumbnail <i class="fa-solid fa-magnifying-glass"></i></button>
+
+        <div id="resultArea">
+            <h3 style="color:white; margin-bottom:15px; font-size:16px;">Preview (Max Quality):</h3>
+            
+            <div class="preview-container">
+                <img id="mainPreview" src="" alt="Thumbnail Preview">
+            </div>
+
+            <h3 style="color:white; margin-bottom:15px; font-size:16px;">Download Options:</h3>
+            <div class="quality-grid">
+                <a id="btnMax" href="#" target="_blank" class="btn-quality">
+                    <i class="fa-solid fa-gem"></i>
+                    Max Resolution
+                    <span class="res">1280x720 (HD)</span>
+                </a>
+                
+                <a id="btnSD" href="#" target="_blank" class="btn-quality">
+                    <i class="fa-solid fa-image"></i>
+                    Standard Def
+                    <span class="res">640x480</span>
+                </a>
+
+                <a id="btnHQ" href="#" target="_blank" class="btn-quality">
+                    <i class="fa-solid fa-photo-film"></i>
+                    High Quality
+                    <span class="res">480x360</span>
+                </a>
+
+                <a id="btnMQ" href="#" target="_blank" class="btn-quality">
+                    <i class="fa-solid fa-mobile-screen"></i>
+                    Medium
+                    <span class="res">320x180</span>
+                </a>
+            </div>
+
+            <div class="hint">
+                <i class="fa-solid fa-circle-info"></i> <b>Note for Mobile:</b> Click a button above to open the image in a new tab, then <b>Long Press</b> to save it.
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const ytUrl = document.getElementById('ytUrl');
+    const getBtn = document.getElementById('getBtn');
+    const errorMsg = document.getElementById('errorMsg');
+    const resultArea = document.getElementById('resultArea');
+    const mainPreview = document.getElementById('mainPreview');
+
+    // Button Links
+    const btnMax = document.getElementById('btnMax');
+    const btnSD = document.getElementById('btnSD');
+    const btnHQ = document.getElementById('btnHQ');
+    const btnMQ = document.getElementById('btnMQ');
+
+    // Function to extract Video ID from URL
+    function YouTubeGetID(url){
+        url = url.split(/(vi\/|v%3D|v=|\/v\/|youtu\.be\/|\/embed\/)/);
+        return undefined !== url[2]?url[2].split(/[^0-9a-z_\-]/i)[0]:url[0];
+    }
+
+    getBtn.addEventListener('click', function() {
+        const url = ytUrl.value.trim();
+        errorMsg.style.display = 'none';
+
+        if(url === "") {
+            errorMsg.innerText = "Please paste a URL first!";
+            errorMsg.style.display = 'block';
+            return;
+        }
+
+        const videoId = YouTubeGetID(url);
+
+        // Basic validation: Video IDs are usually 11 characters
+        if(videoId.length === 11) {
+            getBtn.innerText = "Processing...";
+            
+            setTimeout(() => {
+                // Construct YouTube Image URLs
+                // Some videos might not have maxres, so we set fallback
+                const maxRes = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                const sdRes = `https://img.youtube.com/vi/${videoId}/sddefault.jpg`;
+                const hqRes = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                const mqRes = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+
+                // Update Preview
+                mainPreview.src = maxRes;
+
+                // Update Buttons
+                btnMax.href = maxRes;
+                btnSD.href = sdRes;
+                btnHQ.href = hqRes;
+                btnMQ.href = mqRes;
+
+                // Show Results
+                resultArea.style.display = 'block';
+                getBtn.innerHTML = 'Get Thumbnail <i class="fa-solid fa-magnifying-glass"></i>';
+            }, 500);
+
+        } else {
+            errorMsg.innerText = "Invalid YouTube URL! Please check.";
+            errorMsg.style.display = 'block';
+            resultArea.style.display = 'none';
+        }
+    });
+</script>
+
+</body>
+</html>

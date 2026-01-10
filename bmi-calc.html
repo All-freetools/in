@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Health Calculator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.4.2/css/all.css">
+    <style>
+        /* --- Tool Specific Styles --- */
+        body { overflow-y: scroll; padding-bottom: 50px; background-color: #0f172a; color: white; }
+
+        /* Unit Toggles */
+        .toggle-container {
+            display: flex; background: #1e293b; padding: 5px; border-radius: 12px;
+            border: 1px solid #334155; margin-bottom: 20px;
+        }
+        .toggle-btn {
+            flex: 1; padding: 10px; border: none; background: transparent;
+            color: #94a3b8; font-weight: bold; cursor: pointer; border-radius: 8px;
+            transition: 0.3s;
+        }
+        .toggle-btn.active { background: #3b82f6; color: white; }
+
+        /* Gender Selection */
+        .gender-group { display: flex; gap: 15px; margin-bottom: 20px; }
+        .gender-card {
+            flex: 1; background: #1e293b; border: 2px solid #334155;
+            padding: 15px; border-radius: 12px; cursor: pointer; text-align: center;
+            transition: 0.3s; color: #94a3b8;
+        }
+        .gender-card i { font-size: 24px; margin-bottom: 5px; display: block; }
+        .gender-card.active { border-color: #3b82f6; color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+
+        /* Inputs */
+        .input-group { margin-bottom: 15px; }
+        .input-label { display: block; color: #cbd5e1; font-size: 14px; margin-bottom: 8px; }
+        .form-control {
+            width: 100%; background: #1e293b; border: 1px solid #334155;
+            color: white; padding: 12px; border-radius: 8px; outline: none;
+            font-size: 16px; box-sizing: border-box;
+        }
+        .form-control:focus { border-color: #3b82f6; }
+
+        .row { display: flex; gap: 15px; }
+        .col { flex: 1; }
+
+        /* Calculate Button */
+        .calc-btn {
+            width: 100%; padding: 16px; background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white; border: none; border-radius: 10px; font-size: 18px;
+            font-weight: bold; cursor: pointer; margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            transition: 0.3s;
+        }
+        .calc-btn:hover { transform: translateY(-2px); }
+
+        /* Result Area */
+        .result-container {
+            display: none; margin-top: 30px; animation: slideUp 0.5s ease;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .score-card {
+            background: #1e293b; border-radius: 15px; padding: 25px;
+            text-align: center; border: 1px solid #334155; margin-bottom: 15px;
+        }
+        .bmi-big { font-size: 50px; font-weight: 800; color: white; margin: 5px 0; }
+        .bmi-badge { 
+            display: inline-block; padding: 5px 15px; border-radius: 20px; 
+            font-size: 14px; font-weight: bold; background: #334155; color: white;
+        }
+
+        /* Extra Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-box {
+            background: #1e293b; padding: 15px; border-radius: 10px; border: 1px solid #334155; text-align: center;
+        }
+        .stat-val { font-size: 18px; font-weight: bold; color: white; display: block; margin-top: 5px; }
+        .stat-label { font-size: 12px; color: #94a3b8; }
+
+        /* --- FLOATING HOME BUTTON STYLE --- */
+        .floating-home-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+            background: #3b82f6; /* Matching Blue */
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-family: sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); transform: scale(1); }
+        }
+        .floating-home-btn:hover { background: #2563eb; transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fa-duotone fa-screwdriver-wrench"></i> Free Tool <span>Site</span>
+        </div>
+    </nav>
+
+    <a href="index.html" class="floating-home-btn">
+        <i class="fa-solid fa-house"></i> HOME
+    </a>
+
+    <div class="container" style="max-width: 500px; padding-bottom: 100px;"> 
+        <div class="card" style="background: #0f172a; border:none; box-shadow:none;">
+            <h1 style="color:white; text-align:center;">Health Calculator Pro</h1>
+            <p style="text-align:center; color:#94a3b8; margin-bottom:20px;">BMI, BMR & Ideal Weight</p>
+
+            <div class="toggle-container">
+                <button class="toggle-btn active" onclick="setUnit('metric')" id="btnMetric">Metric (kg/cm)</button>
+                <button class="toggle-btn" onclick="setUnit('imperial')" id="btnImperial">Imperial (lbs/ft)</button>
+            </div>
+
+            <div class="gender-group">
+                <div class="gender-card active" onclick="setGender('male')" id="maleCard">
+                    <i class="fa-solid fa-person"></i> Male
+                </div>
+                <div class="gender-card" onclick="setGender('female')" id="femaleCard">
+                    <i class="fa-solid fa-person-dress"></i> Female
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col input-group">
+                    <label class="input-label">Age</label>
+                    <input type="number" id="age" class="form-control" placeholder="25">
+                </div>
+                <div class="col input-group">
+                    <label class="input-label" id="weightLabel">Weight (kg)</label>
+                    <input type="number" id="weight" class="form-control" placeholder="70">
+                </div>
+            </div>
+
+            <div class="input-group" id="metricHeight">
+                <label class="input-label">Height (cm)</label>
+                <input type="number" id="heightCm" class="form-control" placeholder="175">
+            </div>
+
+            <div class="row" id="imperialHeight" style="display:none;">
+                <div class="col input-group">
+                    <label class="input-label">Feet</label>
+                    <input type="number" id="heightFt" class="form-control" placeholder="5">
+                </div>
+                <div class="col input-group">
+                    <label class="input-label">Inches</label>
+                    <input type="number" id="heightIn" class="form-control" placeholder="9">
+                </div>
+            </div>
+
+            <button onclick="calculateAll()" class="calc-btn">
+                Analyze Health <i class="fa-solid fa-pulse"></i>
+            </button>
+        </div>
+
+        <div id="result" class="result-container">
+            
+            <div class="score-card">
+                <span style="color:#94a3b8;">Your BMI Score</span>
+                <div class="bmi-big" id="bmiVal">0.0</div>
+                <span class="bmi-badge" id="bmiMsg">Normal</span>
+                <div style="margin-top:10px; height:6px; background:#334155; border-radius:3px; overflow:hidden;">
+                    <div id="bmiBar" style="width:0%; height:100%; background:#10b981; transition:1s;"></div>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <i class="fa-solid fa-weight-hanging" style="color:#f59e0b"></i>
+                    <span class="stat-val" id="idealWeight">--</span>
+                    <span class="stat-label">Ideal Weight</span>
+                </div>
+                <div class="stat-box">
+                    <i class="fa-solid fa-fire" style="color:#ef4444"></i>
+                    <span class="stat-val" id="bmrVal">--</span>
+                    <span class="stat-label">Daily Calories</span>
+                </div>
+            </div>
+
+            <p style="text-align:center; color:#64748b; font-size:12px; margin-top:20px;">
+                *Calories to maintain current weight.
+            </p>
+
+        </div>
+    </div>
+
+    <script>
+        let unit = 'metric';
+        let gender = 'male';
+
+        function setUnit(u) {
+            unit = u;
+            document.getElementById('btnMetric').classList.toggle('active', u === 'metric');
+            document.getElementById('btnImperial').classList.toggle('active', u === 'imperial');
+            
+            if (u === 'metric') {
+                document.getElementById('metricHeight').style.display = 'block';
+                document.getElementById('imperialHeight').style.display = 'none';
+                document.getElementById('weightLabel').innerText = 'Weight (kg)';
+                document.getElementById('weight').placeholder = '70';
+            } else {
+                document.getElementById('metricHeight').style.display = 'none';
+                document.getElementById('imperialHeight').style.display = 'flex';
+                document.getElementById('weightLabel').innerText = 'Weight (lbs)';
+                document.getElementById('weight').placeholder = '150';
+            }
+        }
+
+        function setGender(g) {
+            gender = g;
+            document.getElementById('maleCard').classList.toggle('active', g === 'male');
+            document.getElementById('femaleCard').classList.toggle('active', g === 'female');
+        }
+
+        function calculateAll() {
+            // Get Inputs
+            let age = parseFloat(document.getElementById('age').value);
+            let weight = parseFloat(document.getElementById('weight').value);
+            let height = 0;
+
+            if (unit === 'metric') {
+                height = parseFloat(document.getElementById('heightCm').value); // cm
+            } else {
+                let ft = parseFloat(document.getElementById('height

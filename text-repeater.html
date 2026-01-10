@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Repeater</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Theme: Social Gradient */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    
+    body {
+        background: linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .tool-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 500px;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+        background: #f8f9fa;
+        padding: 20px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+    }
+    .header h2 { margin: 0; color: #4A00E0; font-size: 22px; }
+    .header p { font-size: 13px; color: #666; margin-top: 5px; }
+
+    /* Body */
+    .card-body { padding: 25px; }
+
+    /* Inputs */
+    .input-group { margin-bottom: 20px; }
+    .label { font-size: 12px; font-weight: bold; color: #555; margin-bottom: 8px; display: block; text-transform: uppercase; }
+    
+    input[type="text"], input[type="number"] {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 16px;
+        outline: none;
+        transition: 0.3s;
+    }
+    input:focus { border-color: #4A00E0; }
+
+    /* Settings Row */
+    .settings-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        align-items: center;
+    }
+
+    /* Toggle Switch */
+    .toggle-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #f0f2f5;
+        padding: 8px 15px;
+        border-radius: 50px;
+        cursor: pointer;
+        flex: 1;
+        justify-content: center;
+    }
+    .toggle-wrapper input { width: 18px; height: 18px; accent-color: #4A00E0; cursor: pointer; }
+    .toggle-label { font-size: 14px; color: #333; font-weight: 500; cursor: pointer; }
+
+    /* Main Button */
+    .btn-repeat {
+        background: #4A00E0;
+        color: white;
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(74, 0, 224, 0.3);
+        transition: 0.2s;
+    }
+    .btn-repeat:active { transform: scale(0.98); }
+
+    /* Output Area */
+    .output-area {
+        margin-top: 25px;
+        position: relative;
+    }
+    textarea {
+        width: 100%;
+        height: 150px;
+        padding: 15px;
+        border: 2px solid #eee;
+        border-radius: 10px;
+        font-size: 14px;
+        resize: vertical;
+        background: #fafafa;
+        color: #333;
+        outline: none;
+    }
+    textarea:focus { border-color: #4A00E0; background: white; }
+
+    /* Action Buttons (Copy/Share) */
+    .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .btn-action {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .btn-copy { background: #e0e0e0; color: #333; }
+    .btn-share { background: #25D366; color: white; } /* WhatsApp Green */
+
+    /* Toast */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-size: 14px;
+        display: none;
+        z-index: 100;
+    }
+
+    /* --- FLOATING HOME BUTTON STYLE --- */
+    .floating-home-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: #4A00E0; /* Matching Purple */
+        color: white;
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-family: sans-serif;
+        font-weight: bold;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid rgba(255,255,255,0.4);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        backdrop-filter: blur(5px);
+        animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); transform: scale(1); }
+    }
+    .floating-home-btn:hover { background: #3b00b3; transform: scale(1.1); }
+
+</style>
+</head>
+<body>
+
+<a href="index.html" class="floating-home-btn">
+    <i class="fa-solid fa-house"></i> HOME
+</a>
+
+<div class="tool-card">
+    <div class="header">
+        <h2><i class="fa-solid fa-repeat"></i> Text Repeater</h2>
+        <p>Repeat text 1000+ times instantly</p>
+    </div>
+
+    <div class="card-body">
+        
+        <div class="input-group">
+            <span class="label">Enter Text</span>
+            <input type="text" id="inputText" placeholder="e.g. I Love You ❤️">
+        </div>
+
+        <div class="settings-row">
+            <div style="flex: 1;">
+                <span class="label">Repetitions</span>
+                <input type="number" id="repeatCount" value="100" min="1" max="5000">
+            </div>
+            
+            <div style="flex: 1; display: flex; align-items: flex-end;">
+                <label class="toggle-wrapper">
+                    <input type="checkbox" id="newLine" checked>
+                    <span class="toggle-label">New Line</span>
+                </label>
+            </div>
+        </div>
+
+        <button class="btn-repeat" id="repeatBtn">Repeat Text <i class="fa-solid fa-bolt"></i></button>
+
+        <div class="output-area">
+            <span class="label">Result</span>
+            <textarea id="outputText" readonly placeholder="Result will appear here..."></textarea>
+            
+            <div class="actions">
+                <button class="btn-action btn-copy" id="copyBtn"><i class="fa-regular fa-copy"></i> Copy</button>
+                <button class="btn-action btn-share" id="shareBtn"><i class="fa-brands fa-whatsapp"></i> Share</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="toast" id="toast">Copied to Clipboard!</div>
+
+<script>
+    const inputText = document.getElementById('inputText');
+    const repeatCount = document.getElementById('repeatCount');
+    const newLine = document.getElementById('newLine');
+    const repeatBtn = document.getElementById('repeatBtn');
+    const outputText = document.getElementById('outputText');
+    const copyBtn = document.getElementById('copyBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const toast = document.getElementById('toast');
+
+    // 1. Repeat Function
+    repeatBtn.addEventListener('click', () => {
+        let text = inputText.value;
+        let count = parseInt(repeatCount.value);
+        let separator = newLine.checked ? "\n" : " "; // New line or Space
+
+        if (!text) {
+            alert("Please enter some text first!");
+            return;
+        }
+        if (count > 10000) {
+            alert("Max limit is 10,000 to prevent crash!");
+            count = 10000;
+        }
+
+        // Fast Repetition Method
+        // Creates an empty array of size 'count', fills it with text, then joins them
+        let result = Array(count).fill(text).join(separator);
+        
+        outputText.value = result;
+    });
+
+    // 2. Copy Function
+    copyBtn.addEventListener('click', () => {
+        if (!outputText.value) return;
+        
+        outputText.select();
+        outputText.setSelectionRange(0, 999999); // Mobile fix
+        
+        navigator.clipboard.writeText(outputText.value).then(() => {
+            showToast("Copied Successfully!");
+        });
+    });
+
+    // 3. Share Function (Mobile Native Share)
+    shareBtn.addEventListener('click', () => {
+        if (!outputText.value) return;
+
+        // Try to use the native Web Share API (Works on Mobile Chrome/Safari)
+        if (navigator.share) {
+            navigator.share({
+                title: 'Repeated Text',
+                text: outputText.value,
+            })
+            .catch(console.error);
+        } else {
+            // Fallback: Copy and alert
+            outputText.select();
+            navigator.clipboard.writeText(outputText.value);
+            showToast("Copied! Open WhatsApp & Paste.");
+        }
+    });
+
+    function showToast(msg) {
+        toast.innerText = msg;
+        toast.style.display = 'block';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 2000);
+    }
+
+</script>
+
+</body>
+</html>

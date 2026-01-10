@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Percentage Master</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Theme: Sunset Math */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+    
+    body {
+        background: linear-gradient(135deg, #FF512F 0%, #DD2476 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .main-card {
+        background: white;
+        width: 100%;
+        max-width: 600px;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        overflow: hidden;
+        min-height: 500px;
+    }
+
+    /* Tabs Header */
+    .tabs-header {
+        display: flex;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eee;
+        padding: 10px;
+        gap: 10px;
+        overflow-x: auto;
+    }
+    
+    .tab-btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        background: transparent;
+        font-weight: 600;
+        color: #777;
+        cursor: pointer;
+        border-radius: 10px;
+        transition: 0.3s;
+        white-space: nowrap;
+        font-size: 14px;
+    }
+    .tab-btn:hover { background: #ffece6; color: #DD2476; }
+    .tab-btn.active {
+        background: #DD2476;
+        color: white;
+        box-shadow: 0 5px 15px rgba(221, 36, 118, 0.3);
+    }
+
+    /* Content Area */
+    .content-area { padding: 30px; }
+    
+    .calc-section { display: none; animation: fadeIn 0.4s; }
+    .calc-section.active { display: block; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    h2 { font-size: 22px; color: #333; margin-bottom: 5px; }
+    p.desc { font-size: 13px; color: #666; margin-bottom: 25px; }
+
+    /* Inputs */
+    .input-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    
+    input[type="number"] {
+        padding: 12px;
+        border: 2px solid #eee;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        width: 100px;
+        flex: 1;
+        outline: none;
+        text-align: center;
+        color: #333;
+    }
+    input:focus { border-color: #DD2476; }
+
+    .static-text { font-size: 16px; font-weight: 600; color: #555; }
+
+    /* Action Button */
+    .btn-calc {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(to right, #FF512F, #DD2476);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+        box-shadow: 0 5px 15px rgba(221, 36, 118, 0.4);
+    }
+    .btn-calc:active { transform: scale(0.98); }
+
+    /* Result Box */
+    .result-box {
+        margin-top: 30px;
+        background: #fff0f3;
+        border: 1px solid #ffccd5;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        display: none; /* Hidden initially */
+    }
+    
+    .res-label { font-size: 12px; font-weight: bold; color: #DD2476; text-transform: uppercase; letter-spacing: 1px; }
+    .res-value { font-size: 36px; font-weight: 800; color: #333; margin: 5px 0 15px 0; }
+    
+    .formula-box {
+        background: white;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 13px;
+        color: #555;
+        border: 1px dashed #ddd;
+    }
+    .formula-box b { color: #DD2476; }
+
+    /* --- FLOATING HOME BUTTON STYLE --- */
+    .floating-home-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: #DD2476; /* Matching Theme Pink */
+        color: white;
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid rgba(255,255,255,0.2);
+        box-shadow: 0 5px 15px rgba(221, 36, 118, 0.4);
+        backdrop-filter: blur(5px);
+        animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(221, 36, 118, 0.7); transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { box-shadow: 0 0 0 0 rgba(221, 36, 118, 0); transform: scale(1); }
+    }
+    .floating-home-btn:hover { background: #c01b63; transform: scale(1.1); }
+
+</style>
+</head>
+<body>
+
+<a href="index.html" class="floating-home-btn">
+    <i class="fa-solid fa-house"></i> HOME
+</a>
+
+<div class="main-card">
+    
+    <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchTab('basic')"><i class="fa-solid fa-percent"></i> Basic</button>
+        <button class="tab-btn" onclick="switchTab('find')"><i class="fa-solid fa-magnifying-glass"></i> Find %</button>
+        <button class="tab-btn" onclick="switchTab('change')"><i class="fa-solid fa-arrow-trend-up"></i> % Change</button>
+    </div>
+
+    <div class="content-area">
+
+        <div id="basic" class="calc-section active">
+            <h2>Basic Percentage</h2>
+            <p class="desc">Find the value of a percentage.</p>
+
+            <div class="input-row">
+                <span class="static-text">What is</span>
+                <input type="number" id="basic_P" placeholder="20">
+                <span class="static-text">% of</span>
+                <input type="number" id="basic_N" placeholder="500">
+                <span class="static-text">?</span>
+            </div>
+
+            <button class="btn-calc" onclick="calcBasic()">Calculate Answer</button>
+
+            <div class="result-box" id="resBox_basic">
+                <div class="res-label">Result</div>
+                <div class="res-value" id="res_basic">0</div>
+                <div class="formula-box">
+                    Formula: (<b id="f_basic_p">P</b> × <b id="f_basic_n">N</b>) ÷ 100
+                </div>
+            </div>
+        </div>
+
+        <div id="find" class="calc-section">
+            <h2>Find Percentage</h2>
+            <p class="desc">Find out what percentage one number is of another.</p>
+
+            <div class="input-row">
+                <input type="number" id="find_A" placeholder="25">
+                <span class="static-text">is what % of</span>
+                <input type="number" id="find_B" placeholder="100">
+                <span class="static-text">?</span>
+            </div>
+
+            <button class="btn-calc" onclick="calcFind()">Calculate Percentage</button>
+
+            <div class="result-box" id="resBox_find">
+                <div class="res-label">It is</div>
+                <div class="res-value" id="res_find">0%</div>
+                <div class="formula-box">
+                    Formula: (<b id="f_find_a">A</b> ÷ <b id="f_find_b">B</b>) × 100
+                </div>
+            </div>
+        </div>
+
+        <div id="change" class="calc-section">
+            <h2>Percentage Change</h2>
+            <p class="desc">Calculate % increase or decrease between two values.</p>
+
+            <div class="input-row">
+                <span class="static-text">From</span>
+                <input type="number" id="change_Old" placeholder="100">
+                <span class="static-text">to</span>
+                <input type="number" id="change_New" placeholder="150">
+            </div>
+
+            <button class="btn-calc" onclick="calcChange()">Calculate Change</button>
+
+            <div class="result-box" id="resBox_change">
+                <div class="res-label">Difference</div>
+                <div class="res-value" id="res_change">0%</div>
+                <div class="formula-box">
+                    Formula: ((<b id="f_chg_new">New</b> - <b id="f_chg_old">Old</b>) ÷ Old) × 100
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Tab Switching Logic
+    function switchTab(tabId) {
+        // Remove active class from all buttons and sections
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.calc-section').forEach(sec => sec.classList.remove('active'));
+        document.querySelectorAll('.result-box').forEach(box => box.style.display = 'none');
+
+        // Add active class to clicked button
+        event.currentTarget.classList.add('active');
+        
+        // Show relevant section
+        document.getElementById(tabId).classList.add('active');
+    }
+
+    // 1. Calculate Basic Percentage
+    function calcBasic() {
+        let p = parseFloat(document.getElementById('basic_P').value);
+        let n = parseFloat(document.getElementById('basic_N').value);
+
+        if (isNaN(p) || isNaN(n)) return alert("Please enter valid numbers");
+
+        let result = (p * n) / 100;
+
+        // Show Result
+        document.getElementById('res_basic').innerText = Number.isInteger(result) ? result : result.toFixed(2);
+        document.getElementById('resBox_basic').style.display = 'block';
+
+        // Update Formula Help
+        document.getElementById('f_basic_p').innerText = p;
+        document.getElementById('f_basic_n').innerText = n;
+    }
+
+    // 2. Calculate "Find Percentage"
+    function calcFind() {
+        let a = parseFloat(document.getElementById('find_A').value);
+        let b = parseFloat(document.getElementById('find_B').value);
+
+        if (isNaN(a) || isNaN(b) || b === 0) return alert("Please enter valid numbers");
+
+        let result = (a / b) * 100;
+
+        document.getElementById('res_find').innerText = (Number.isInteger(result) ? result : result.toFixed(2)) + "%";
+        document.getElementById('resBox_find').style.display = 'block';
+
+        document.getElementById('f_find_a').innerText = a;
+        document.getElementById('f_find_b').innerText = b;
+    }
+
+    // 3. Calculate % Change
+    function calcChange() {
+        let oldVal = parseFloat(document.getElementById('change_Old').value);
+        let newVal = parseFloat(document.getElementById('change_New').value);
+
+        if (isNaN(oldVal) || isNaN(newVal) || oldVal === 0) return alert("Please enter valid numbers");
+
+        let change = ((newVal - oldVal) / oldVal) * 100;
+        let sign = change > 0 ? "+" : ""; // Add plus sign for increase
+
+        let text = change > 0 ? "Increase" : "Decrease";
+        if(change === 0) text = "No Change";
+
+        // Update UI
+        let finalVal = document.getElementById('res_change');
+        finalVal.innerText = sign + (Number.isInteger(change) ? change : change.toFixed(2)) + "%";
+        
+        // Change color based on increase/decrease
+        if(change > 0) finalVal.style.color = "green";
+        else if(change < 0) finalVal.style.color = "red";
+        else finalVal.style.color = "black";
+
+        document.getElementById('resBox_change').style.display = 'block';
+        
+        document.getElementById('f_chg_new').innerText = newVal;
+        document.getElementById('f_chg_old').innerText = oldVal;
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sale Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Theme: Shopping / Hot Sale */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+    
+    body {
+        /* Red/Pink Gradient for Sale Vibes */
+        background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .calc-card {
+        background: white;
+        width: 100%;
+        max-width: 450px;
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* Decorative Ribbon */
+    .ribbon {
+        position: absolute;
+        top: 20px;
+        right: -35px;
+        background: #FFD700; /* Gold */
+        width: 150px;
+        text-align: center;
+        transform: rotate(45deg);
+        font-weight: bold;
+        color: #d32f2f;
+        box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        font-size: 14px;
+        padding: 5px 0;
+    }
+
+    /* Header */
+    .header {
+        padding: 25px;
+        text-align: center;
+        background: #fff;
+    }
+    .header i { font-size: 40px; color: #FF4B2B; margin-bottom: 5px; }
+    .header h2 { font-size: 24px; color: #333; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Body */
+    .card-body { padding: 0 25px 25px 25px; }
+
+    /* Inputs */
+    .input-group { margin-bottom: 20px; }
+    .label { font-size: 13px; font-weight: 600; color: #777; margin-bottom: 8px; display: block; }
+    
+    .input-wrapper {
+        display: flex;
+        align-items: center;
+        background: #f4f4f4;
+        border-radius: 10px;
+        padding: 10px 15px;
+        border: 2px solid transparent;
+        transition: 0.3s;
+    }
+    .input-wrapper:focus-within { border-color: #FF4B2B; background: #fff; }
+    .input-wrapper i { color: #aaa; margin-right: 10px; }
+    
+    input[type="number"] {
+        border: none;
+        background: transparent;
+        width: 100%;
+        font-size: 18px;
+        font-weight: 700;
+        color: #333;
+        outline: none;
+    }
+
+    /* Slider */
+    input[type=range] {
+        width: 100%;
+        margin-top: 10px;
+        accent-color: #FF4B2B;
+        cursor: pointer;
+        height: 6px;
+    }
+
+    /* Additional Discount Toggle */
+    .extra-opt {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+        cursor: pointer;
+    }
+    .extra-opt input { width: 18px; height: 18px; accent-color: #FF4B2B; cursor: pointer; }
+    .extra-opt label { font-size: 14px; font-weight: 600; color: #555; cursor: pointer; }
+
+    /* Result Box */
+    .result-section {
+        background: #333;
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        margin-top: 20px;
+    }
+    
+    .final-price {
+        font-size: 36px;
+        font-weight: 800;
+        color: #FFD700; /* Gold text */
+        margin-bottom: 5px;
+    }
+    
+    .savings-row {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        font-size: 14px;
+        color: #ccc;
+    }
+    .savings-badge {
+        background: #4caf50;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 12px;
+    }
+    .original-price { text-decoration: line-through; opacity: 0.7; }
+
+    /* --- FLOATING HOME BUTTON STYLE --- */
+    .floating-home-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: #fff; /* White background to pop against red gradient */
+        color: #FF4B2B; /* Theme Red Text */
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        backdrop-filter: blur(5px);
+        animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); transform: scale(1); }
+    }
+    .floating-home-btn:hover { background: #f0f0f0; transform: scale(1.1); }
+
+</style>
+</head>
+<body>
+
+<a href="index.html" class="floating-home-btn">
+    <i class="fa-solid fa-house"></i> HOME
+</a>
+
+<div class="calc-card">
+    <div class="ribbon">SALE!</div>
+    
+    <div class="header">
+        <i class="fa-solid fa-tags"></i>
+        <h2>Sale Calc</h2>
+    </div>
+
+    <div class="card-body">
+        
+        <div class="input-group">
+            <span class="label">Original Price</span>
+            <div class="input-wrapper">
+                <i class="fa-solid fa-dollar-sign"></i>
+                <input type="number" id="priceInput" placeholder="0.00" value="100">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <span class="label">Discount: <span id="discVal" style="color:#FF4B2B">20%</span></span>
+            <div class="input-wrapper">
+                <i class="fa-solid fa-percent"></i>
+                <input type="number" id="discInput" placeholder="0" value="20">
+            </div>
+            <input type="range" id="discRange" min="0" max="99" value="20">
+        </div>
+
+        <div class="extra-opt">
+            <input type="checkbox" id="taxCheck">
+            <label for="taxCheck">Add Tax (+8%)</label>
+        </div>
+
+        <div class="result-section">
+            <div class="label" style="color:#aaa; font-weight:400; margin-bottom:0;">Final Price</div>
+            <div class="final-price" id="finalPrice">$80.00</div>
+            
+            <div class="savings-row">
+                <span class="original-price" id="origPrice">$100.00</span>
+                <span>You Save: <span id="savedAmount" style="color:#fff; font-weight:bold;">$20.00</span></span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Elements
+    const priceInput = document.getElementById('priceInput');
+    const discInput = document.getElementById('discInput');
+    const discRange = document.getElementById('discRange');
+    const discVal = document.getElementById('discVal');
+    const taxCheck = document.getElementById('taxCheck');
+    
+    const finalPriceEl = document.getElementById('finalPrice');
+    const origPriceEl = document.getElementById('origPrice');
+    const savedAmountEl = document.getElementById('savedAmount');
+
+    // Sync Inputs
+    function syncDisc(val) {
+        discInput.value = val;
+        discRange.value = val;
+        discVal.innerText = val + "%";
+        calculate();
+    }
+
+    discInput.addEventListener('input', (e) => {
+        let val = e.target.value;
+        if(val > 100) val = 100;
+        syncDisc(val);
+    });
+
+    discRange.addEventListener('input', (e) => {
+        syncDisc(e.target.value);
+    });
+
+    priceInput.addEventListener('input', calculate);
+    taxCheck.addEventListener('change', calculate);
+
+    function calculate() {
+        let price = parseFloat(priceInput.value);
+        let discount = parseFloat(discInput.value);
+        
+        if(isNaN(price)) price = 0;
+        if(isNaN(discount)) discount = 0;
+
+        // Calculate Savings
+        let saved = price * (discount / 100);
+        let final = price - saved;
+
+        // Calculate Tax (if checked) - Usually tax is on the discounted price
+        if(taxCheck.checked) {
+            let tax = final * 0.08; // 8% Tax
+            final += tax;
+        }
+
+        // Update UI
+        finalPriceEl.innerText = "$" + final.toFixed(2);
+        origPriceEl.innerText = "$" + price.toFixed(2);
+        savedAmountEl.innerText = "$" + saved.toFixed(2);
+    }
+
+    // Init
+    calculate();
+
+</script>
+
+</body>
+</html>

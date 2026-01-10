@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pro Photo Resizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Theme: Cyber Violet */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    
+    body {
+        background-color: #0f0c29;
+        background-image: linear-gradient(315deg, #0f0c29 0%, #302b63 74%, #24243e 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        color: #fff;
+    }
+
+    .resize-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        width: 100%;
+        max-width: 550px;
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.1);
+        padding: 25px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    }
+
+    /* Header */
+    .header { text-align: center; margin-bottom: 25px; }
+    .header h2 { font-family: 'Rajdhani', sans-serif; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; color: #ad5389; }
+    .header h2 span { color: #3c1053; background: #fff; padding: 0 5px; border-radius: 4px; }
+
+    /* Upload Area */
+    .upload-box {
+        border: 2px dashed #ad5389;
+        background: rgba(173, 83, 137, 0.1);
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .upload-box:hover { background: rgba(173, 83, 137, 0.2); }
+    .upload-box i { font-size: 35px; color: #fff; margin-bottom: 10px; }
+    #fileInput { display: none; }
+
+    /* Controls Area */
+    .controls {
+        display: none; /* Hidden Initially */
+        margin-top: 25px;
+        animation: fadeIn 0.5s;
+    }
+
+    .img-preview {
+        width: 100px;
+        height: auto;
+        border-radius: 5px;
+        border: 1px solid #fff;
+        display: block;
+        margin: 0 auto 15px auto;
+    }
+
+    .input-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    .input-group { flex: 1; }
+    .input-group label { font-size: 12px; color: #ccc; display: block; margin-bottom: 5px; }
+    
+    input[type="number"], select {
+        width: 100%;
+        padding: 10px;
+        background: rgba(0,0,0,0.3);
+        border: 1px solid #555;
+        border-radius: 5px;
+        color: white;
+        font-size: 16px;
+        outline: none;
+    }
+
+    /* Checkbox */
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        margin-bottom: 15px;
+        cursor: pointer;
+    }
+    .checkbox-wrapper input { accent-color: #ad5389; width: 16px; height: 16px; }
+
+    /* Download Button */
+    .btn-download {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(to right, #ad5389, #3c1053);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+        text-transform: uppercase;
+        margin-top: 10px;
+    }
+    .btn-download:hover { box-shadow: 0 0 20px rgba(173, 83, 137, 0.5); }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* --- FLOATING HOME BUTTON STYLE --- */
+    .floating-home-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: #ad5389; /* Matching Theme Color */
+        color: white;
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid rgba(255,255,255,0.2);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        backdrop-filter: blur(5px);
+        animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(173, 83, 137, 0.7); transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { box-shadow: 0 0 0 0 rgba(173, 83, 137, 0); transform: scale(1); }
+    }
+    .floating-home-btn:hover { background: #3c1053; transform: scale(1.1); }
+
+</style>
+</head>
+<body>
+
+<a href="index.html" class="floating-home-btn">
+    <i class="fa-solid fa-house"></i> HOME
+</a>
+
+<div class="resize-card">
+    <div class="header">
+        <h2>Photo <span>Resizer</span></h2>
+        <p style="font-size:12px; color:#aaa; margin-top:5px;">Change Dimensions & Format</p>
+    </div>
+
+    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+        <i class="fa-solid fa-image"></i>
+        <h3>Upload Image</h3>
+        <p style="font-size:12px; opacity:0.7;">Supports JPG, PNG, WEBP</p>
+    </div>
+    <input type="file" id="fileInput" accept="image/*">
+
+    <div class="controls" id="controls">
+        <img id="preview" class="img-preview">
+        
+        <div class="input-row">
+            <div class="input-group">
+                <label>Width (px)</label>
+                <input type="number" id="widthInput">
+            </div>
+            <div class="input-group">
+                <label>Height (px)</label>
+                <input type="number" id="heightInput">
+            </div>
+        </div>
+
+        <label class="checkbox-wrapper">
+            <input type="checkbox" id="aspectRatio" checked>
+            Lock Aspect Ratio (Keep shape)
+        </label>
+
+        <div class="input-row">
+            <div class="input-group">
+                <label>Quality (0.1 - 1.0)</label>
+                <input type="number" id="quality" value="0.9" step="0.1" max="1" min="0.1">
+            </div>
+            <div class="input-group">
+                <label>Save Format</label>
+                <select id="format">
+                    <option value="image

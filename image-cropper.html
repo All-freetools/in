@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pro Image Cropper</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+
+<style>
+    /* --- Premium Dark Editor Theme --- */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    
+    body {
+        background: #121212; /* Deep Dark BG */
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 15px;
+        color: #eee;
+    }
+
+    .editor-card {
+        background: #1e1e1e; /* Dark Card */
+        width: 100%;
+        max-width: 600px;
+        border-radius: 15px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        overflow: hidden;
+        border: 1px solid #333;
+    }
+
+    /* Header */
+    .header {
+        background: #252525;
+        padding: 15px;
+        text-align: center;
+        border-bottom: 1px solid #333;
+    }
+    .header h2 { margin: 0; font-size: 20px; color: #00bcd4; /* Cyan Accent */ }
+
+    /* 1. Upload Section */
+    .upload-box {
+        padding: 30px;
+        text-align: center;
+        border-bottom: 1px solid #333;
+    }
+    .upload-btn-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+    }
+    .btn-upload {
+        border: 2px dashed #00bcd4;
+        color: #00bcd4;
+        background-color: transparent;
+        padding: 15px 30px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .btn-upload:hover { background: rgba(0, 188, 212, 0.1); }
+    .btn-upload i { margin-right: 8px; }
+    .upload-btn-wrapper input[type=file] {
+        font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer;
+    }
+
+    /* 2. Editor Area (Hidden Initially) */
+    #editor-area {
+        display: none;
+        padding: 15px;
+    }
+
+    /* Canvas Container */
+    .img-container {
+        max-height: 400px; /* Limit height on mobile */
+        background-color: #000;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    #image-to-crop { max-width: 100%; display: block; }
+
+    /* Toolbar */
+    .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 15px;
+        background: #252525;
+        padding: 10px;
+        border-radius: 8px;
+    }
+    .tool-group {
+        display: flex;
+        gap: 5px;
+    }
+    .btn-tool {
+        background: #333;
+        color: #ddd;
+        border: none;
+        padding: 10px 12px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: 0.2s;
+    }
+    .btn-tool:hover { background: #444; color: #00bcd4; }
+    .btn-tool.active { background: #00bcd4; color: #000; font-weight: bold; }
+
+    /* Action Buttons */
+    .actions { display: flex; gap: 10px; }
+    .btn-action {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .btn-reset { background: #444; color: white; }
+    .btn-crop { background: #00bcd4; color: black; }
+
+    /* 3. Result Area */
+    #result-area {
+        display: none;
+        background: #252525;
+        padding: 20px;
+        text-align: center;
+        border-top: 1px solid #333;
+    }
+    .result-title { color: #00bcd4; margin-bottom: 10px; }
+    #cropped-result {
+        max-width: 100%;
+        border-radius: 8px;
+        border: 2px solid #00bcd4;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .save-hint {
+        margin-top: 15px; font-size: 13px; color: #aaa; background: #333; padding: 10px; border-radius: 5px;
+    }
+
+    /* --- FLOATING HOME BUTTON STYLE --- */
+    .floating-home-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: #00bcd4; /* Cyan */
+        color: #000; /* Black text for contrast */
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-family: sans-serif;
+        font-weight: bold;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid rgba(255,255,255,0.2);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        backdrop-filter: blur(5px);
+        animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(0, 188, 212, 0.7); transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { box-shadow: 0 0 0 0 rgba(0, 188, 212, 0); transform: scale(1); }
+    }
+    .floating-home-btn:hover { background: #00acc1; transform: scale(1.1); }
+
+</style>
+</head>
+<body>
+
+<a href="index.html" class="floating-home-btn">
+    <i class="fa-solid fa-house"></i> HOME
+</a>
+
+<div class="editor-card">
+    <div class="header">
+        <h2><i class="fa-solid fa-crop-simple"></i> Pro Image Cropper</h2>
+    </div>
+
+    <div class="upload-box" id="upload-section">
+        <div class="upload-btn-wrapper">
+            <button class="btn-upload"><i class="fa-solid fa-image"></i> Upload Image to Crop</button>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+        <p style="color:#777; font-size:13px; margin-top:10px;">Supports JPG, PNG, WebP</p>
+    </div>
+
+    <div id="editor-area">
+        <div class="img-container">
+            <img id="image-to-crop" src="">
+        </div>
+
+        <div class="toolbar">
+            <div class="tool-group">
+                <button class="btn-tool" data-method="zoom" data-option="0.1" title="Zoom In"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                <button class="btn-tool" data-method="zoom" data-option="-0.1" title="Zoom Out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+            </div>
+            <div class="tool-group">
+                <button class="btn-tool" data-method="rotate" data-option="-45" title="Rotate Left"><i class="fa-solid fa-arrow-rotate-left"></i></button>
+                <button class="btn-tool" data-method="rotate" data-option="45" title="Rotate Right"><i class="fa-solid fa-arrow-rotate-right"></i></button>
+            </div>
+            <div class="tool-group">
+                <button class="btn-tool" data-method="scaleX" data-option="-1" title="Flip Horizontal"><i class="fa-solid fa-arrows-left-right"></i></button>
+                <button class="btn-tool" data-method="scaleY" data-option="-1" title="Flip Vertical"><i class="fa-solid fa-arrows-up-down"></i></button>
+            </div>
+        </div>
+
+        <div class="toolbar" style="justify-content: center;">
+             <button class="btn-tool active" data-method="setAspectRatio" data-option="NaN">Free</button>
+             <button class="btn-tool" data-method="setAspectRatio" data-option="1">1:1 (Square)</button>
+             <button class="btn-tool" data-method="setAspectRatio" data-option="1.7777777777">16:9 (Cover)</button>
+             <button class="btn-tool" data-method="setAspectRatio" data-option="0.6666666667">2:3 (Portrait)</button>
+        </div>
+
+        <div class="actions">
+            <button class="btn-action btn-reset" id="resetBtn"><i class="fa-solid fa-xmark"></i> Reset</button>
+            <button class="btn-action btn-crop" id="cropBtn"><i class="fa-solid fa-check"></i> Crop & Save</button>
+        </div>
+    </div>
+
+    <div id="result-area">
+        <h3 class="result-title">Cropped Result</h3>
+        <img id="cropped-result" src="">
+        <div class="save-hint">
+            <i class="fa-solid fa-hand-pointer"></i> <b>How to Save:</b><br>
+            Long Press on the image above and select "Download/Save Image".
+        </div>
+        <button class="btn-action btn-reset" id="tryAgainBtn" style="margin-top:15px;">Crop Another</button>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+<script>
+    // Elements
+    const fileInput = document.getElementById('fileInput');
+    const uploadSection = document.getElementById('upload-section');
+    const editorArea = document.getElementById('editor-area');
+    const image = document.getElementById('image-to-crop');
+    const resultArea = document.getElementById('result-area');
+    const croppedResult = document.getElementById('cropped-result');
+    
+    // Buttons
+    const cropBtn = document.getElementById('cropBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const tryAgainBtn = document.getElementById('tryAgainBtn');
+    const toolbarButtons = document.querySelectorAll('.btn-tool');
+
+    let cropper; // Variable to store the cropper instance
+
+    // 1. Handle File Upload
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                image.src = event.target.result;
+                // Show editor, hide upload
+                uploadSection.style.display = 'none';
+                editorArea.style.display = 'block';
+                
+                // Initialize Cropper (Destroy previous if exists)
+                if (cropper) { cropper.destroy(); }
+                cropper = new Cropper(image, {
+                    aspectRatio: NaN, // Default to free crop
+                    viewMode: 1, // Restrict crop box to image bounds
+                    dragMode: 'move', // Allow moving the image
+                    autoCropArea: 0.8,
+                    responsive: true,
+                });
+            }
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    // 2. Handle Toolbar Actions (Zoom, Rotate, Ratio, etc.)
+    toolbarButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const method = this.getAttribute('data-method');
+            const option = this.getAttribute('data-option');
+
+            if (cropper && method) {
+                // Handle Ratio Buttons active state
+                if (method === 'setAspectRatio') {
+                    document.querySelectorAll('[data-method="setAspectRatio"]').forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                }
+
+                // Execute Cropper method
+                cropper[method](option);
+
+                // Handle Flip toggle state
+                if (method === 'scaleX' || method === 'scaleY') {
+                     this.setAttribute('data-option', -option);
+                }
+            }
+        });
+    });
+
+    // 3. Reset Action
+    resetBtn.addEventListener('click', () => {
+        if (cropper) cropper.reset();
+    });
+
+    // 4. Crop Action & Show Result
+    cropBtn.addEventListener('click', () => {
+        if (cropper) {
+            // Get cropped canvas
+            const canvas = cropper.getCroppedCanvas({
+                maxWidth: 1080, // Limit output size for performance
+                maxHeight: 1080,
+            });
+
+            // Show Result
+            croppedResult.src = canvas.toDataURL('image/jpeg', 0.9); // High Quality JPG
+            editorArea.style.display = 'none';
+            resultArea.style.display = 'block';
+        }
+    });
+
+    // 5. Try Again Action
+    tryAgainBtn.addEventListener('click', () => {
+        resultArea.style.display = 'none';
+        uploadSection.style.display = 'block';
+        fileInput.value = ''; // Reset input
+        if (cropper) { cropper.destroy(); }
+    });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lorem Ipsum Gen</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Theme: Modern Writer/Dev Dark Blue */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    
+    body {
+        background: linear-gradient(135deg, #1c1c1c 0%, #2c3e50 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        color: #eee;
+    }
+
+    .tool-card {
+        background: #252525;
+        width: 100%;
+        max-width: 650px;
+        border-radius: 15px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+        overflow: hidden;
+        border: 1px solid #333;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+        background: #34495e;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        border-bottom: 1px solid #444;
+    }
+    .header i { font-size: 32px; color: #3498db; }
+    .header h2 { font-size: 20px; font-weight: bold; margin: 0; color: white; }
+    .header p { font-size: 13px; color: #bbb; margin: 0; }
+
+    /* Controls Panel */
+    .controls {
+        padding: 20px;
+        background: #2c2c2c;
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 2 Column Layout */
+        gap: 15px;
+        border-bottom: 1px solid #333;
+    }
+
+    .control-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: bold;
+        color: #aaa;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+    }
+
+    /* Custom Select & Input */
+    select, input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        background: #1f1f1f;
+        border: 1px solid #444;
+        border-radius: 6px;
+        color: white;
+        font-size: 14px;
+        outline: none;
+    }
+    select:focus, input:focus { border-color: #3498db; }
+
+    /* Checkbox */
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 5px;
+        cursor: pointer;
+    }
+    .checkbox-wrapper input { width: 16px; height: 16px; accent-color: #3498db; cursor: pointer; }
+    .checkbox-wrapper span { font-size: 14px; color: #ddd; }
+
+    /* Action Buttons */
+    .actions {
+        grid-column: span 2; /* Full width */
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-gen { background: #3498db; color: white; }
+    .btn-gen:active { background: #2980b9; transform: scale(0.98); }
+    
+    .btn-copy { background: #27ae60; color: white; display: none; } /* Hidden initially */
+    .btn-copy:active { background: #219150; transform: scale(0.98); }
+
+    /* Output Area */
+    .output-area {
+        position: relative;
+        background: #1a1a1a;
+        padding: 20px;
+        min-height: 250px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    #resultText {
+        color: #dcdcdc;
+        font-family: 'Courier New', Courier, monospace; /* Monospace for code look */
+        line-height: 1.6;
+        font-size: 14px;
+        white-space: pre-wrap; /* Preserve line breaks */
+    }
+
+    .placeholder {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        color: #444;
+        text-align: center;
+    }
+    .placeholder i { font-size: 40px; margin-bottom: 10px; display: block; }
+
+    /* Toast Notification */
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-size: 14px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        display: none;
+        z-index: 1000;
+        border: 1px solid #444;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 500px) {
+        .controls { grid-template-columns: 1fr; }
+        .actions { grid-column: span 1; }
+    }
+
+    /* --- FLOATING HOME BUTTON STYLE --- */
+    .floating-home-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: #3498db; /* Matching Sky Blue */
+        color: white;
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-family: sans-serif;
+        font-weight: bold;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid rgba(255,255,255,0.2);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        backdrop-filter: blur(5px);
+        animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7); transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); transform: scale(1); }
+    }
+    .floating-home-btn:hover { background: #2980b9; transform: scale(1.1); }
+
+</style>
+</head>
+<body>
+
+<a href="index.html" class="floating-home-btn">
+    <i class="fa-solid fa-house"></i> HOME
+</a>
+
+<div class="tool-card">
+    <div class="header">
+        <i class="fa-solid fa-paragraph"></i>
+        <div>
+            <h2>Lorem Ipsum Gen</h2>
+            <p>Dummy text for design & code</p>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>Generate Type</label>
+            <select id="typeSelect">
+                <option value="paras">Paragraphs</option>
+                <option value="sentences">Sentences</option>
+                <option value="words">Words</option>
+                <option value="list">List Items (li)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Quantity</label>
+            <input type="number" id="countInput" value="3" min="1" max="100">
+        </div>
+
+        <div class="control-group" style="grid-column: span 2;">
+            <label>Options</label>
+            <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                <label class="checkbox-wrapper">
+                    <input type="checkbox" id="startLorem" checked>
+                    <span>Start with "Lorem ipsum..."</span>
+                </label>
+                <label class="checkbox-wrapper">
+                    <input type="checkbox" id="htmlTags">
+                    <span>Include HTML Tags (&lt;p&gt;)</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-gen" id="generateBtn"><i class="fa-solid fa-bolt"></i> Generate Text</button>
+            <button class="btn btn-copy" id="copyBtn"><i class="fa-regular fa-copy"></i> Copy Text</button>
+        </div>
+    </div>
+
+    <div class="output-area">
+        <div class="placeholder" id="placeholder">
+            <i class="fa-solid fa-code"></i>
+            Generated text will appear here
+        </div>
+        <div id="resultText"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"><i class="fa-solid fa-check"></i> Copied to Clipboard!</div>
+
+<script>
+    // Elements
+    const typeSelect = document.getElementById('typeSelect');
+    const countInput = document.getElementById('countInput');
+    const startLorem = document.getElementById('startLorem');
+    const htmlTags = document.getElementById('htmlTags');
+    const generateBtn = document.getElementById('generateBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const resultText = document.getElementById('resultText');
+    const placeholder = document.getElementById('placeholder');
+    const toast = document.getElementById('toast');
+
+    // The Lorem Dictionary
+    const dictionary =

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image to Text OCR</title>
+<script src='https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js'></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    /* Theme: Modern Scanner App */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+    
+    body {
+        background-color: #f0f2f5;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .scanner-card {
+        background: white;
+        width: 100%;
+        max-width: 600px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+        background: #2563eb; /* Royal Blue */
+        padding: 20px;
+        text-align: center;
+        color: white;
+    }
+    .header h2 { font-size: 22px; margin-bottom: 5px; }
+    .header p { font-size: 13px; opacity: 0.9; }
+
+    /* Body */
+    .body-content { padding: 25px; }
+
+    /* Upload Box */
+    .upload-box {
+        border: 2px dashed #cbd5e1;
+        background: #f8fafc;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-bottom: 20px;
+    }
+    .upload-box:hover { border-color: #2563eb; background: #eff6ff; }
+    .upload-box i { font-size: 40px; color: #2563eb; margin-bottom: 10px; }
+    .upload-box p { color: #64748b; font-size: 14px; }
+    
+    #fileInput { display: none; }
+
+    /* Preview Image */
+    #imagePreview {
+        width: 100%;
+        max-height: 200px;
+        object-fit: contain;
+        border-radius: 10px;
+        display: none;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+    }
+
+    /* Progress Bar */
+    .progress-wrapper {
+        display: none;
+        margin-bottom: 20px;
+    }
+    .progress-info { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; color: #555; }
+    .progress-bg {
+        width: 100%;
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%;
+        background: #2563eb;
+        width: 0%;
+        transition: 0.3s;
+    }
+
+    /* Result Area */
+    .result-area {
+        display: none;
+        margin-top: 10px;
+    }
+    .label { font-size: 12px; font-weight: bold; color: #333; margin-bottom: 5px; display: block; }
+    
+    textarea {
+        width: 100%;
+        height: 150px;
+        padding: 15px;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        font-size: 14px;
+        resize: vertical;
+        outline: none;
+        background: #fff;
+    }
+    textarea:focus { border-color: #2563eb; }
+
+    /* Copy Button */
+    .btn-copy {
+        width: 100%;
+        padding: 12px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+    }
+    .btn-copy:active { transform: scale(0.98); }
+
+    /* --- FLOATING HOME BUTTON STYLE --- */
+    .floating-home-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 10000;
+        background: #2563eb; /* Matching Royal Blue */
+        color: white;
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid rgba(255,255,255,0.2);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        backdrop-filter: blur(5px);
+        animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); transform: scale(1); }
+    }
+    .floating-home-btn:hover { background: #1d4ed8; transform: scale(1.1); }
+
+</style>
+</head>
+<body>
+
+<a href="index.html" class="floating-home-btn">
+    <i class="fa-solid fa-house"></i> HOME
+</a>
+
+<div class="scanner-card">
+    <div class="header">
+        <h2><i class="fa-solid fa-expand"></i> AI Text Scanner</h2>
+        <p>Extract text from any image instantly</p>
+    </div>
+
+    <div class="body-content">
+        
+        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <h3>Upload Image</h3>
+            <p>Tap to select file</p>
+        </div>
+        <input type="file" id="fileInput" accept="image/*">
+
+        <img id="imagePreview">
+
+        <div class="progress-wrapper" id="progressWrapper">
+            <div class="progress-info">
+                <span id="statusText">Scanning...</span>
+                <span id="percentText">0%</span>
+            </div>
+            <div class="progress-bg">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="result-area" id="resultArea">
+            <span class="label">Extracted Text:</span>
+            <textarea id="outputText" placeholder="Result will appear here..."></textarea>
+            <button class="btn-copy" onclick="copyText()">
+                <i class="fa-regular fa-copy"></i> Copy Text
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const progressWrapper = document.getElementById('progressWrapper');
+    const progressFill = document.getElementById('progressFill');
+    const statusText = document.getElementById('statusText');
+    const percentText = document.getElementById('percentText');
+    const resultArea = document.getElementById('resultArea');
+    const outputText = document.getElementById('outputText');
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Show Image Preview
+        imagePreview.src = URL.createObjectURL(file);
+        imagePreview.style.display = 'block';
+        
+        // Reset UI
+        resultArea.style.display = 'none';
+        progressWrapper.style.display = 'block';
+        outputText.value = "";
+        
+        // Start OCR
+        recognizeText(file);
+    });
+
+    function recognizeText(file) {
+        Tesseract.recognize(
+            file,
+            'eng', // Language (English)
+            {
+                logger: m => {
+                    if (m.status === 'recognizing text') {
+                        const pct = Math.round(m.progress * 100);
+                        progressFill.style.width = pct + '%';
+                        percentText.innerText = pct + '%';
+                        statusText.innerText = "Extracting Text...";
+                    } else {
+                        statusText.innerText = m.status;
+                    }
+                }
+            }
+        ).then(({ data: { text } }) => {
+            progressWrapper.style.display = 'none';
+            resultArea.style.display = 'block';
+            outputText.value = text;
+        });
+    }
+
+    function copyText() {
+        if(!outputText.value) return;
+        outputText.select();
+        document.execCommand('copy');
+        alert("Text Copied!");
+    }
+</script>
+
+</body>
+</html>
