@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.4.2/css/all.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
-    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@latest/dist/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/index.js"></script>
 
     <style>
         :root {
@@ -16,101 +16,18 @@
             --card-bg: #1e293b;
             --border: rgba(255, 255, 255, 0.1);
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-
-        body {
-            background-color: var(--dark-bg);
-            color: #e2e8f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .tool-container {
-            background: var(--card-bg);
-            width: 100%;
-            max-width: 850px;
-            border-radius: 24px;
-            padding: 40px;
-            border: 1px solid var(--border);
-            text-align: center;
-            position: relative;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-        }
-
-        .back-home {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            text-decoration: none;
-            color: #94a3b8;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .upload-area {
-            border: 2px dashed #334155;
-            border-radius: 16px;
-            padding: 60px 20px;
-            cursor: pointer;
-            background: rgba(255,255,255,0.02);
-            margin: 30px 0;
-        }
-
-        .upload-area:hover { border-color: var(--primary); }
-
-        /* Checkerboard background for transparency preview */
-        .transparent-bg {
-            background-image: linear-gradient(45deg, #2a3441 25%, transparent 25%), 
-                              linear-gradient(-45deg, #2a3441 25%, transparent 25%), 
-                              linear-gradient(45deg, transparent 75%, #2a3441 75%), 
-                              linear-gradient(-45deg, transparent 75%, #2a3441 75%);
-            background-size: 20px 20px;
-            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-            border-radius: 12px;
-            padding: 10px;
-        }
-
-        .result-container {
-            display: none;
-            margin-top: 20px;
-            animation: fadeIn 0.5s;
-        }
-
+        body { background-color: var(--dark-bg); color: #e2e8f0; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .tool-container { background: var(--card-bg); width: 100%; max-width: 850px; border-radius: 24px; padding: 40px; border: 1px solid var(--border); text-align: center; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .back-home { position: absolute; top: 20px; left: 20px; text-decoration: none; color: #94a3b8; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .upload-area { border: 2px dashed #334155; border-radius: 16px; padding: 60px 20px; cursor: pointer; background: rgba(255,255,255,0.02); margin: 30px 0; }
+        .transparent-bg { background-image: linear-gradient(45deg, #2a3441 25%, transparent 25%), linear-gradient(-45deg, #2a3441 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #2a3441 75%), linear-gradient(-45deg, transparent 75%, #2a3441 75%); background-size: 20px 20px; border-radius: 12px; padding: 10px; }
+        .result-container { display: none; margin-top: 20px; }
         img { max-width: 100%; border-radius: 8px; }
-
-        .loader-container {
-            display: none;
-            margin: 20px 0;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255,255,255,0.1);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
+        .loader-container { display: none; margin: 20px 0; }
+        .spinner { width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .btn {
-            padding: 12px 25px;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            margin: 10px;
-        }
-
+        .btn { padding: 12px 25px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; margin: 10px; text-decoration: none; display: inline-block; }
         .btn-download { background: var(--primary); color: white; }
     </style>
 </head>
@@ -120,7 +37,7 @@
         <a href="index.html" class="back-home"><i class="fa-solid fa-arrow-left"></i> Back Home</a>
 
         <h1 style="margin-top:20px;">AI Background Remover</h1>
-        <p style="color:#94a3b8">Powered by On-Device AI. Your photos never leave your computer.</p>
+        <p style="color:#94a3b8">On-Device AI (GitHub Compatible Mode)</p>
 
         <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
             <i class="fa-solid fa-image" style="font-size: 50px; color: var(--primary); margin-bottom: 15px;"></i>
@@ -130,7 +47,7 @@
 
         <div class="loader-container" id="loader">
             <div class="spinner"></div>
-            <p id="status">Initializing AI Engine...</p>
+            <p id="status">Loading AI Engine... (First time may take a few seconds)</p>
         </div>
 
         <div class="result-container" id="resultArea">
@@ -156,35 +73,34 @@
             const file = e.target.files[0];
             if (!file) return;
 
-            // Show UI
             dropZone.style.display = 'none';
             loader.style.display = 'block';
-            statusText.innerText = "Analyzing Image (this may take a moment)...";
 
             try {
-                // RUN THE AI
-                // The first time this runs, it downloads a small AI model (~10MB)
-                const blob = await imglyRemoveBackground(file);
-                
-                // Create URL for the result
+                // Modified for better compatibility
+                const config = {
+                    publicPath: "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/dist/",
+                    progress: (status, progress) => {
+                        statusText.innerText = `${status.replace('_', ' ')}... ${Math.round(progress * 100)}%`;
+                    }
+                };
+
+                const blob = await imglyRemoveBackground(file, config);
                 const url = URL.createObjectURL(blob);
                 
-                // Show Result
                 outputImage.src = url;
                 loader.style.display = 'none';
                 resultArea.style.display = 'block';
 
-                // Setup Download
                 document.getElementById('downloadBtn').onclick = () => {
                     const a = document.createElement('a');
                     a.href = url;
                     a.download = 'removed-bg.png';
                     a.click();
                 };
-
             } catch (error) {
                 console.error(error);
-                alert("Error processing image. Please try a different photo.");
+                alert("Processing failed. This usually happens on mobile browsers with limited RAM or GitHub's security block. Please try on a Desktop.");
                 location.reload();
             }
         });
